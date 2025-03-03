@@ -122,7 +122,7 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
 
     public async Task ProcessTransactions(CancellationToken token)
     {
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
+        var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
         var lastCommittedTransactionSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
         await _observers.ForEachAsync(x => x.PreHandleLedgerExtension(_clock.UtcNow));
 

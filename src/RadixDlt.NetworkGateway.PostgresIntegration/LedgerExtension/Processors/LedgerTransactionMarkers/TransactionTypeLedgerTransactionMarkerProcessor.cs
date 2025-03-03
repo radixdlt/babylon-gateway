@@ -69,7 +69,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
-internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor
+internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMarkerProcessor, ITransactionProcessor
 {
     private readonly ProcessorContext _context;
     private readonly List<TransactionTypeLedgerTransactionMarker> _ledgerTransactionMarkersToAdd = new();
@@ -81,13 +81,17 @@ internal class TransactionTypeLedgerTransactionMarkerProcessor : ITransactionMar
 
     public void VisitTransaction(CoreModel.CommittedTransaction committedTransaction, long stateVersion)
     {
+        if (committedTransaction.LedgerTransaction is CoreModel.RoundUpdateLedgerTransaction)
+        {
+            return;
+        }
+
         var transactionType = committedTransaction.LedgerTransaction switch
         {
             CoreModel.FlashLedgerTransaction => LedgerTransactionMarkerTransactionType.ProtocolUpdateFlash,
             CoreModel.GenesisLedgerTransaction genesisLedgerTransaction => genesisLedgerTransaction.IsFlash
                 ? LedgerTransactionMarkerTransactionType.GenesisFlash
                 : LedgerTransactionMarkerTransactionType.GenesisTransaction,
-            CoreModel.RoundUpdateLedgerTransaction => LedgerTransactionMarkerTransactionType.RoundChange,
             CoreModel.UserLedgerTransaction => LedgerTransactionMarkerTransactionType.User,
             CoreModel.UserLedgerTransactionV2 => LedgerTransactionMarkerTransactionType.User,
             _ => throw new ArgumentOutOfRangeException($"Unexpected ledger transaction type: {committedTransaction.LedgerTransaction.GetType()}"),

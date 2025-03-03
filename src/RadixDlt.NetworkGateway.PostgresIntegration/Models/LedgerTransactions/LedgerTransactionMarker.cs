@@ -72,7 +72,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 internal enum LedgerTransactionMarkerTransactionType
 {
     User,
-    RoundChange,
     GenesisFlash,
     GenesisTransaction,
     ProtocolUpdateFlash,
@@ -146,6 +145,12 @@ internal class ManifestAddressLedgerTransactionMarker : LedgerTransactionMarker
     [Column("operation_type")]
     public LedgerTransactionMarkerOperationType OperationType { get; set; }
 
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+}
+
+internal class ResourceBalanceChangeTransactionMarker : LedgerTransactionMarker
+{
     [Column("entity_id")]
     public long EntityId { get; set; }
 }

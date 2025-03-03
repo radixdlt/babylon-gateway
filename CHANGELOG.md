@@ -1,3 +1,46 @@
+## 1.10.0
+Release built: _not released yet_
+
+### Bug fixes
+- Fixed two bugs in two-way links returned from `/state/entity/details` (If you are affected and your two-way link is not working, the Radix Console tool https://console.radixdlt.com/configure-metadata can help fix it. You may also consider using the blueprint link feature introduced in that release, though it is not yet supported by the tool and must be set manually). 
+  - If one end of the link pointed to an entity without a corresponding metadata key, it was incorrectly considered a valid two-way link.
+  - Fixed invalidation after removing a metadata entry on one end. Previously, the link was still considered valid even after the metadata entry was removed.
+
+### API Changes
+- New filters are supported on the `/stream/transactions` endpoint:
+    - `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
+    - `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend integrators use this instead of the `manifest_resources_filter` in most instances.
+- Improved the performance of the `/extensions/resource-holders/page` endpoint.
+- Added a new, detailed events model that provides more in-depth insights and additional context, allowing you to work with events more effectively. It is returned when the `detailed_events` opt-in is enabled for the `/stream/transactions` and `/stream/transactions` endpoints. The existing `events` property is now deprecated, and we advise switching to the new detailed events model.
+- Added two new endpoints that allow querying for entities that have ever used a requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
+  - `/extensions/entities-by-role-requirement/lookup` – allows querying by multiple requirements.
+  - `/extensions/entities-by-role-requirement/page` – allows querying and paginating by a single requirement.
+- The `manifest_classes` of the transaction manifest in the `/stream/transactions` endpoint have been adjusted slightly. Notably:
+  - The `General` classification has been expanded to permit validator stake/unstake/claim actions and pool contribute and redeem actions. 
+- Added a new endpoint `/extensions/implicit-requirements/lookup` for resolving implicit access rule requirements (https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements).
+- Added [blueprint link](https://docs.radixdlt.com/docs/metadata-for-verification#blueprint-Link) support
+  - dApp details
+    - `auto_link_blueprints` property added to `two_way_linked_dapp_details.entities.items` if entity is package and has any auto link blueprint defined.
+  - Linked entity changes
+    - Update to `two_way_linked_dapp_address` previously it returned only direct links, right now it resolves to `direct_linked_dapp_address` if it exists; otherwise, it falls back to `blueprint_linked_dapp_address`.
+    - New property `direct_linked_dapp_address` returns verified direct two-way link to the dApp address, if available.
+    - New property `blueprint_linked_dapp_address` returns verified blueprint two-way link to the dApp address, if available.
+
+### Database changes
+- New entries added to the `ledger_transaction_markers` table for each resource whose balance (excluding fee-related changes) was modified in a transaction. Each resource balance change will be represented by an entry with the `resource_balance_change` discriminator and the resource's `entity_id`.
+- Removed `transaction_type.round_update` from the `ledger_transaction_markers` table. This should reduce database size and slightly improve the performance of the `/stream/transactions` endpoint.
+- A new index `IX_ledger_transaction_markers_resource_balance_change` has been added to the `ledger_transaction_markers` table.
+- A new index `IX_ledger_transactions_receipt_status_state_version` has been added to the `ledger_transactions` table.
+- Replaced the `IX_resource_holders_entity_id_resource_entity_id_balance` index with the `IX_resource_holders_resource_entity_id_balance_entity_id` index on the `resource_holders` table.
+- New `outer_object_entity_id` column in the `entities` table, which holds the outer object entity id (e.g resource entity id for vaults and consensus manager entity id for validators).
+- New `receipt_event_emitter_entity_ids` column in the `ledger_transaction_events` table, which holds the emitter entity ids for transaction events.
+- Added a new `entities_by_role_requirement_entry_definition` table that stores information about entities that have ever used a requirement (resource or non-fungible global ID) in their access rules.
+- Added a new `implicit_requirements` table to store data necessary for resolving implicit access rule requirements.
+
+### What’s new?
+- Added a new configuration parameter, `GatewayApi__Endpoint__EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount`, which sets the limit (default `50`) on the number of requirements that can be queried using the `/extensions/entities-by-role-requirement/lookup` endpoint.
+- Added a new configuration parameter, `GatewayApi__Endpoint__ImplicitRequirementsLookupMaxRequestedRequirementsCount`, which sets the limit (default `100`) on the number of implicit requirements that can be queried using the `/extensions/implicit-requirements/lookup` endpoint.
+
 ## 1.9.2
 Release built: 9.12.2024
 

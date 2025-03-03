@@ -21,6 +21,7 @@ The Network Gateway services can be configured in line with the [configuration i
 - `GatewayApi__Endpoint__DefaultHeavyCollectionsPageSize` (type: `int`, default value: `10`) - default page size for heavy collections endpoint. Affected endpoints - `/state/package/page/codes`, `/state/package/page/blueprints`, and `/state/entity/page/schemas`.
 - `GatewayApi__Endpoint__DefaultPageSize` (type: `int`, default value: `100`) - default page size for all endpoints that do not have explicit configuration.
 
+- `GatewayApi__Endpoint__EntitiesByRoleRequirementLookupMaxRequestedRequirementsCount` - (type: `int`, default value: `50`) - maximum number of requirements that can be passed to the `/extensions/entities-by-role-requirement/lookup` endpoint. 
 - `GatewayApi__Endpoint__StateEntityDetailsPageSize` (type: `int`, default value: `20`) - maximum number of addresses that can be passed to `/state/entity/details` endpoint.
 - `GatewayApi__Endpoint__TransactionAccountDepositPreValidationMaxResourceItems` (type: `int`, default value: `20`) - maximum number of resources that can be passed to `/transaction/account-deposit-pre-validation` endpoint.
 - `GatewayApi__Endpoint__ExplicitMetadataMaxItems` (type: `int`, default value: `20`) - maximum number of metadata keys that can be passed as explicit metadata parameter.
@@ -31,6 +32,7 @@ The Network Gateway services can be configured in line with the [configuration i
 
 - `GatewayApi__Endpoint__RequestTimeout` - (type: `timespan in string format [d.]hh:mm:ss[.fffffff]`, default value: `10s`) - the amount of time after which request gets canceled and timeout is returned from API.
 - `GatewayApi__Endpoint__MaxDefinitionsLookupLimit` - (type: `int`, default value: `50 000`) - Max number of definitions to scan when searching for non-deleted entries.
+
 
 #### Ledger Lag
 - `GatewayApi__AcceptableLedgerLag__PreventReadRequestsIfDbLedgerIsBehind` (type: `bool`, default value: `true`) - controls if API will return a response if observed ledger state by the gateway is behind.
@@ -64,6 +66,9 @@ The Network Gateway services can be configured in line with the [configuration i
 
 #### Slow Query logging
 - `DataAggregator__SlowQueryLogging__SlowQueryThreshold` (type: `timespan in string format [d.]hh:mm:ss[.fffffff]`, default value: `250ms`) - threshold after which query is considered slow and will be logged.
+
+#### Processor related configuration
+- `DataAggregator__LedgerProcessors__EntitiesByRoleRequirementsPerStateVersionWarningThreshold` (type: `int`, default value: `25`) - Specifies the threshold for the number of entries added to the entities_by_role_requirement_entry_definition table per transaction that triggers a warning.
 
 #### Network
 - `DataAggregator__Network__NetworkName` (type: `string`, default value: `empty`) - the name of the network data aggregator is operating on.

@@ -172,9 +172,17 @@ internal class DefaultTransactionHandler : ITransactionHandler
             _ => throw new UnreachableException($"Didn't expect {request.KindFilter} value"),
         };
 
+        var statusFilter = request.TransactionStatusFilter switch
+        {
+            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Success => LedgerTransactionStatusFilter.Success,
+            GatewayModel.StreamTransactionsRequest.TransactionStatusFilterEnum.Failure => LedgerTransactionStatusFilter.Failure,
+            _ => LedgerTransactionStatusFilter.All,
+        };
+
         var searchCriteria = new TransactionStreamPageRequestSearchCriteria
         {
             Kind = kindFilter,
+            Status = statusFilter,
         };
 
         request.AffectedGlobalEntitiesFilter?.ForEach(a => searchCriteria.AffectedGlobalEntities.Add((EntityAddress)a));
@@ -183,22 +191,25 @@ internal class DefaultTransactionHandler : ITransactionHandler
         request.ManifestAccountsWithdrawnFromFilter?.ForEach(a => searchCriteria.ManifestAccountsWithdrawnFrom.Add((EntityAddress)a));
         request.ManifestBadgesPresentedFilter?.ForEach(a => searchCriteria.BadgesPresented.Add((EntityAddress)a));
         request.ManifestResourcesFilter?.ForEach(a => searchCriteria.ManifestResources.Add((EntityAddress)a));
-        request.EventsFilter?.ForEach(ef =>
-        {
-            var eventType = ef.Event switch
+        request.BalanceChangeResourcesFilter?.ForEach(a => searchCriteria.BalanceChangeResources.Add((EntityAddress)a));
+        request.EventsFilter?.ForEach(
+            ef =>
             {
-                GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Deposit => LedgerTransactionEventFilter.EventType.Deposit,
-                GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Withdrawal => LedgerTransactionEventFilter.EventType.Withdrawal,
-                _ => throw new UnreachableException($"Didn't expect {ef.Event} value"),
-            };
+                var eventType = ef.Event switch
+                {
+                    GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Deposit => LedgerTransactionEventFilter.EventType.Deposit,
+                    GatewayModel.StreamTransactionsRequestEventFilterItem.EventEnum.Withdrawal => LedgerTransactionEventFilter.EventType.Withdrawal,
+                    _ => throw new UnreachableException($"Didn't expect {ef.Event} value"),
+                };
 
-            searchCriteria.Events.Add(new LedgerTransactionEventFilter
-            {
-                Event = eventType,
-                EmitterEntityAddress = ef.EmitterAddress != null ? (EntityAddress)ef.EmitterAddress : null,
-                ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
+                searchCriteria.Events.Add(
+                    new LedgerTransactionEventFilter
+                    {
+                        Event = eventType,
+                        EmitterEntityAddress = ef.EmitterAddress != null ? (EntityAddress)ef.EmitterAddress : null,
+                        ResourceAddress = ef.ResourceAddress != null ? (EntityAddress)ef.ResourceAddress : null,
+                    });
             });
-        });
         request.AccountsWithManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithManifestOwnerMethodCalls.Add((EntityAddress)a));
         request.AccountsWithoutManifestOwnerMethodCalls?.ForEach(a => searchCriteria.AccountsWithoutManifestOwnerMethodCalls.Add((EntityAddress)a));
 
@@ -237,7 +248,12 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var decidingFactors = await _depositPreValidationQuerier.AccountTryDepositPreValidation(
             (EntityAddress)request.AccountAddress,
             request.ResourceAddresses.Select(x => (EntityAddress)x).ToArray(),
-            request.Badge != null ? (EntityAddress)request.Badge.ResourceAddress : null,
+            request.Badge switch
+            {
+                GatewayModel.AccountDepositPreValidationNonFungibleBadge accountDepositPreValidationNonFungibleBadge => (EntityAddress)accountDepositPreValidationNonFungibleBadge.ResourceAddress,
+                GatewayModel.AccountDepositPreValidationResourceBadge accountDepositPreValidationResourceBadge => (EntityAddress)accountDepositPreValidationResourceBadge.ResourceAddress,
+                _ => null,
+            },
             nonFungibleBadgeNfid,
             atLedgerState,
             token
@@ -248,7 +264,8 @@ internal class DefaultTransactionHandler : ITransactionHandler
             return new GatewayModel.AccountDepositPreValidationResponse(
                 atLedgerState,
                 true,
-                decidingFactors.ResourceSpecificDetails
+                decidingFactors
+                    .ResourceSpecificDetails
                     .Select(x => new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(x.ResourceAddress, true))
                     .ToList(),
                 decidingFactors);
@@ -261,43 +278,43 @@ internal class DefaultTransactionHandler : ITransactionHandler
             switch (decidingFactorItem.ResourcePreferenceRule)
             {
                 case GatewayModel.AccountResourcePreferenceRule.Allowed:
-                    {
-                        var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
-                        resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                        break;
-                    }
+                {
+                    var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
+                    resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                    break;
+                }
 
                 case GatewayModel.AccountResourcePreferenceRule.Disallowed:
-                    {
-                        var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
-                        resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                        break;
-                    }
+                {
+                    var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
+                    resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                    break;
+                }
 
                 case null:
                     switch (decidingFactors.DefaultDepositRule)
                     {
                         case GatewayModel.AccountDefaultDepositRule.Reject:
-                            {
-                                var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
-                                resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                                break;
-                            }
+                        {
+                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, false);
+                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                            break;
+                        }
 
                         case GatewayModel.AccountDefaultDepositRule.Accept:
-                            {
-                                var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
-                                resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                                break;
-                            }
+                        {
+                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, true);
+                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                            break;
+                        }
 
                         case GatewayModel.AccountDefaultDepositRule.AllowExisting:
-                            {
-                                var allowsTryDeposit = decidingFactorItem.IsXrd || decidingFactorItem.VaultExists;
-                                var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, allowsTryDeposit);
-                                resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
-                                break;
-                            }
+                        {
+                            var allowsTryDeposit = decidingFactorItem.IsXrd || decidingFactorItem.VaultExists;
+                            var resourceSpecificResponseItem = new GatewayModel.AccountDepositPreValidationResourceSpecificBehaviourItem(decidingFactorItem.ResourceAddress, allowsTryDeposit);
+                            resourceSpecificResponseCollection.Add(resourceSpecificResponseItem);
+                            break;
+                        }
 
                         default:
                             throw new ArgumentOutOfRangeException($"Unexpected value of {decidingFactors.DefaultDepositRule}");

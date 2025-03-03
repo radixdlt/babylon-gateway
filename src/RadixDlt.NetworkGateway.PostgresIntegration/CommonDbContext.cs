@@ -171,6 +171,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ResourceHolder> ResourceHolders => Set<ResourceHolder>();
 
+    public DbSet<ImplicitRequirement> ImplicitRequirements => Set<ImplicitRequirement>();
+
+    public DbSet<EntitiesByRoleRequirementEntryDefinition> EntitiesByRoleRequirement => Set<EntitiesByRoleRequirementEntryDefinition>();
+
     public DbSet<EntityResourceEntryDefinition> EntityResourceEntryDefinition => Set<EntityResourceEntryDefinition>();
 
     public DbSet<EntityResourceTotalsHistory> EntityResourceTotalsHistory => Set<EntityResourceTotalsHistory>();
@@ -218,10 +222,13 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.HasPostgresEnum<StateType>();
         modelBuilder.HasPostgresEnum<AuthorizedDepositorBadgeType>();
         modelBuilder.HasPostgresEnum<StandardMetadataKey>();
+        modelBuilder.HasPostgresEnum<EntityRoleRequirementType>();
 
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
         HookupDefinitions(modelBuilder);
+        RegisterImplicitRequirements(modelBuilder);
+        RegisterEntitiesByRoleRequirement(modelBuilder);
         HookupHistory(modelBuilder);
     }
 
@@ -269,6 +276,10 @@ internal abstract class CommonDbContext : DbContext
             .Entity<LedgerTransaction>()
             .HasIndex(lt => lt.RoundTimestamp);
 
+        modelBuilder
+            .Entity<LedgerTransaction>()
+            .HasIndex(lt => new { lt.ReceiptStatus, lt.StateVersion });
+
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder
             .Entity<LedgerTransaction>()
@@ -285,7 +296,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<ManifestClassMarker>(LedgerTransactionMarkerType.ManifestClass)
             .HasValue<AffectedGlobalEntityTransactionMarker>(LedgerTransactionMarkerType.AffectedGlobalEntity)
             .HasValue<EventGlobalEmitterTransactionMarker>(LedgerTransactionMarkerType.EventGlobalEmitter)
-            .HasValue<EpochChangeLedgerTransactionMarker>(LedgerTransactionMarkerType.EpochChange);
+            .HasValue<EpochChangeLedgerTransactionMarker>(LedgerTransactionMarkerType.EpochChange)
+            .HasValue<ResourceBalanceChangeTransactionMarker>(LedgerTransactionMarkerType.ResourceBalanceChange);
 
         modelBuilder
             .Entity<LedgerTransactionMarker>()
@@ -305,6 +317,12 @@ internal abstract class CommonDbContext : DbContext
             .Entity<EpochChangeLedgerTransactionMarker>()
             .HasIndex(e => new { e.EpochChange, e.StateVersion })
             .HasFilter("discriminator = 'epoch_change'");
+
+        modelBuilder
+            .Entity<ResourceBalanceChangeTransactionMarker>()
+            .HasIndex(e => new { e.EntityId, e.StateVersion })
+            .HasFilter("discriminator = 'resource_balance_change'")
+            .HasDatabaseName("IX_ledger_transaction_markers_resource_balance_change");
 
         modelBuilder
             .Entity<ManifestAddressLedgerTransactionMarker>()
@@ -454,6 +472,96 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder
             .Entity<NonFungibleVaultEntryDefinition>()
             .HasIndex(e => new { e.VaultEntityId, e.FromStateVersion });
+    }
+
+    private static void RegisterImplicitRequirements(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasPostgresEnum<ImplicitRequirementType>();
+        modelBuilder.HasPostgresEnum<QueriedImplicitRequirementType>();
+
+        modelBuilder
+            .Entity<ImplicitRequirement>()
+            .HasDiscriminator(e => e.Discriminator)
+            .HasValue<GlobalCallerEntityImplicitRequirement>(ImplicitRequirementType.GlobalCallerEntity)
+            .HasValue<PackageOfDirectCallerImplicitRequirement>(ImplicitRequirementType.PackageOfDirectCaller)
+            .HasValue<GlobalCallerBlueprintImplicitRequirement>(ImplicitRequirementType.GlobalCallerBlueprint)
+            .HasValue<Secp256K1PublicKeyImplicitRequirement>(ImplicitRequirementType.Secp256k1PublicKey)
+            .HasValue<Ed25519PublicKeyImplicitRequirement>(ImplicitRequirementType.Ed25519PublicKey);
+
+        // All indexes here are used by both DataAggregator and API.
+        // Only difference is that API when reading needed to include `FirstSeenStateVersion` field.
+        modelBuilder
+            .Entity<GlobalCallerEntityImplicitRequirement>()
+            .HasIndex(e => new { e.Hash, e.EntityId })
+            .HasFilter("discriminator = 'global_caller_entity'")
+            .HasDatabaseName("IX_implicit_requirements_global_caller_entity")
+            .IncludeProperties(x => new { x.FirstSeenStateVersion })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<PackageOfDirectCallerImplicitRequirement>()
+            .HasIndex(e => new { e.Hash, e.EntityId })
+            .HasFilter("discriminator = 'package_of_direct_caller'")
+            .HasDatabaseName("IX_implicit_requirements_package_of_direct_caller")
+            .IncludeProperties(x => new { x.FirstSeenStateVersion })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<GlobalCallerBlueprintImplicitRequirement>()
+            .HasIndex(e => new { e.Hash, e.EntityId, e.BlueprintName })
+            .HasFilter("discriminator = 'global_caller_blueprint'")
+            .HasDatabaseName("IX_implicit_requirements_global_caller_blueprint")
+            .IncludeProperties(x => new { x.FirstSeenStateVersion })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<Secp256K1PublicKeyImplicitRequirement>()
+            .HasIndex(e => new { e.Hash })
+            .HasFilter("discriminator = 'secp256k1public_key'")
+            .HasDatabaseName("IX_implicit_requirements_secp256k1public_key")
+            .IncludeProperties(x => new { x.PublicKeyBytes, x.FirstSeenStateVersion })
+            .IsUnique();
+
+        modelBuilder
+            .Entity<Ed25519PublicKeyImplicitRequirement>()
+            .HasIndex(e => new { e.Hash })
+            .HasFilter("discriminator = 'ed25519public_key'")
+            .HasDatabaseName("IX_implicit_requirements_ed25519public_key")
+            .IncludeProperties(x => new { x.PublicKeyBytes, x.FirstSeenStateVersion })
+            .IsUnique();
+    }
+
+    private static void RegisterEntitiesByRoleRequirement(ModelBuilder modelBuilder)
+    {
+        modelBuilder
+            .Entity<EntitiesByRoleRequirementEntryDefinition>()
+            .HasDiscriminator<EntityRoleRequirementType>(DiscriminatorColumnName)
+            .HasValue<EntitiesByResourceRoleRequirementEntryDefinition>(EntityRoleRequirementType.Resource)
+            .HasValue<EntitiesByNonFungibleRoleRequirementEntryDefinition>(EntityRoleRequirementType.NonFungible);
+
+        // Used by DA to insert data.
+        modelBuilder
+            .Entity<EntitiesByResourceRoleRequirementEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId })
+            .HasFilter("discriminator = 'resource'");
+
+        // Used by API to fetch page of data.
+        modelBuilder
+            .Entity<EntitiesByResourceRoleRequirementEntryDefinition>()
+            .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId })
+            .HasFilter("discriminator = 'resource'");
+
+        // Used by DA to insert data.
+        modelBuilder
+            .Entity<EntitiesByNonFungibleRoleRequirementEntryDefinition>()
+            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.NonFungibleLocalId })
+            .HasFilter("discriminator = 'non_fungible'");
+
+        // Used by API to fetch page of data.
+        modelBuilder
+            .Entity<EntitiesByNonFungibleRoleRequirementEntryDefinition>()
+            .HasIndex(e => new { e.FirstSeenStateVersion, e.Id, e.EntityId, e.ResourceEntityId, e.NonFungibleLocalId })
+            .HasFilter("discriminator = 'non_fungible'");
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -638,14 +746,19 @@ internal abstract class CommonDbContext : DbContext
             .Entity<UnverifiedStandardMetadataEntryHistory>()
             .HasIndex(e => new { e.EntityId, e.Discriminator, e.FromStateVersion });
 
+        // Used by Data aggregator when inserting new data.
         modelBuilder
             .Entity<ResourceHolder>()
             .HasIndex(e => new { e.EntityId, e.ResourceEntityId })
             .IsUnique();
 
+        // Used by Gateway API when querying resource holders endpoint.
+        // It's quicker when inserting values to have index (balance DESC, entity_id ASC)
+        // as if new value with same balance appears we'll only have to append it at the end.
         modelBuilder
             .Entity<ResourceHolder>()
-            .HasIndex(e => new { e.EntityId, e.ResourceEntityId, e.Balance });
+            .HasIndex(e => new { e.ResourceEntityId, e.Balance, e.EntityId })
+            .IsDescending(false, true, false);
 
         modelBuilder
             .Entity<EntityResourceTotalsHistory>()

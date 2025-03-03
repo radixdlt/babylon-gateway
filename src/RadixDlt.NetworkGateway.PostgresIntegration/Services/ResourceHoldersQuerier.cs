@@ -81,7 +81,7 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
     private readonly ReadOnlyDbContext _dbContext;
     private readonly IDapperWrapper _dapperWrapper;
 
-    private record ResourceHoldersResultRow(long Id, EntityAddress EntityAddress, TokenAmount Balance, long LastUpdatedAtStateVersion);
+    private record ResourceHoldersResultRow(long EntityId, EntityAddress EntityAddress, TokenAmount Balance, long LastUpdatedAtStateVersion);
 
     public ResourceHoldersQuerier(ReadOnlyDbContext dbContext, IDapperWrapper dapperWrapper)
     {
@@ -116,23 +116,32 @@ internal class ResourceHoldersQuerier : IResourceHoldersQuerier
         {
             resourceEntityId = resourceEntity.Id,
             balanceBoundary = cursor?.BalanceBoundary ?? TokenAmount.MaxValue.ToString(),
-            idBoundary = cursor?.IdBoundary ?? long.MaxValue,
+            idBoundary = cursor?.IdBoundary ?? 0,
             limit = limit + 1,
         };
 
+        // Make sure to use option 1.
+        // 1. ORDER BY rh.balance DESC, rh.entity_id DESC
+        // 2. ORDER BY (rh.balance, rh.entity_id) DESC
+        // As second option resulted in very bad performance (it didn't use index at all, even though both fields were indexed).
+
+        // Pay attention to order by and filtering trick for fetching next pages
+        // we wanted to order by balance DESC, entity_id ASC
+        // there is no easy option to apply filter where rh.balance is lower or equal and entity_id is greater or equal.
+        // simple hack for that is to switch (@idBoundary with rh.entity_id) and do it like that - (rh.balance, @idBoundary) <= (Cast(@balanceBoundary AS numeric(1000,0)), rh.entity_id)
         var cd = DapperExtensions.CreateCommandDefinition(
             @"
 SELECT
-    ro.id as Id,
+    rh.entity_id AS EntityId,
     e.address AS EntityAddress,
-    CAST(ro.balance AS text) AS Balance,
-    ro.last_updated_at_state_version AS LastUpdatedAtStateVersion
-FROM resource_holders ro
+    CAST(rh.balance AS text) AS Balance,
+    rh.last_updated_at_state_version AS LastUpdatedAtStateVersion
+FROM resource_holders rh
 INNER JOIN entities e
-ON ro.entity_id = e.id
-WHERE ro.resource_entity_id = @resourceEntityId
-  AND (ro.balance, ro.id) <= (Cast(@balanceBoundary AS numeric(1000,0)), @idBoundary)
-ORDER BY (ro.balance, ro.entity_id) DESC
+ON rh.entity_id = e.id
+WHERE rh.resource_entity_id = @resourceEntityId
+  AND (rh.balance, @idBoundary) <= (Cast(@balanceBoundary AS numeric(1000,0)), rh.entity_id)
+ORDER BY rh.balance DESC, rh.entity_id ASC
 LIMIT @limit",
             parameters,
             cancellationToken: token
@@ -143,7 +152,7 @@ LIMIT @limit",
         var nextPageExists = entriesAndOneMore.Count == limit + 1 && lastElement != null;
 
         var nextCursor = nextPageExists
-            ? new GatewayModel.ResourceHoldersCursor(lastElement!.Id, lastElement.Balance.ToSubUnitString()).ToCursorString()
+            ? new GatewayModel.ResourceHoldersCursor(lastElement!.EntityId, lastElement.Balance.ToSubUnitString()).ToCursorString()
             : null;
 
         switch (resourceEntity)

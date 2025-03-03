@@ -97,7 +97,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddNetworkGatewayAbstractions()
-            .AddNetworkGatewayCoreServices();
+            .AddNetworkConfigurationProvider();
 
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")

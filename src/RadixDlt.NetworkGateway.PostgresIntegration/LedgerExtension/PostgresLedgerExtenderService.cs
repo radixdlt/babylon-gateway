@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.DataAggregator;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.AccountSecurityRules;
@@ -92,12 +93,14 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
     private record ExtendLedgerReport(TransactionSummary FinalTransaction, int RowsTouched, TimeSpan DbReadDuration, TimeSpan DbWriteDuration, TimeSpan ContentHandlingDuration);
 
     private readonly ILogger<PostgresLedgerExtenderService> _logger;
+    private readonly ILogger<EntitiesByRoleRequirementProcessor> _entitiesByRoleRequirementProcessorLogger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IEnumerable<ILedgerExtenderServiceObserver> _observers;
     private readonly IClock _clock;
-    private readonly IOptionsMonitor<StorageOptions> _storageOptions;
+    private readonly IOptionsMonitor<StorageOptions> _storageOptionsMonitor;
+    private readonly IOptionsMonitor<LedgerProcessorsOptions> _ledgerProcessorsOptionsMonitor;
 
     public PostgresLedgerExtenderService(
         ILogger<PostgresLedgerExtenderService> logger,
@@ -106,7 +109,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         IEnumerable<ILedgerExtenderServiceObserver> observers,
         IClock clock,
         ITopOfLedgerProvider topOfLedgerProvider,
-        IOptionsMonitor<StorageOptions> storageOptions)
+        IOptionsMonitor<StorageOptions> storageOptionsMonitor,
+        IOptionsMonitor<LedgerProcessorsOptions> ledgerProcessorsOptionsMonitor,
+        ILogger<EntitiesByRoleRequirementProcessor> entitiesByRoleRequirementProcessorLogger)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
@@ -114,7 +119,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         _observers = observers;
         _clock = clock;
         _topOfLedgerProvider = topOfLedgerProvider;
-        _storageOptions = storageOptions;
+        _storageOptionsMonitor = storageOptionsMonitor;
+        _ledgerProcessorsOptionsMonitor = ledgerProcessorsOptionsMonitor;
+        _entitiesByRoleRequirementProcessorLogger = entitiesByRoleRequirementProcessorLogger;
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
@@ -223,7 +230,7 @@ UPDATE pending_transactions
 
     private async Task<ExtendLedgerReport> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
+        var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
         var rowsInserted = 0;
         var rowsUpdated = 0;
         var dbReadDuration = TimeSpan.Zero;
@@ -260,18 +267,58 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted(nameof(UpdatePendingTransactions), sw.Elapsed, null));
         }
 
-        var processorContext = new ProcessorContext(sequences, _storageOptions.CurrentValue, readHelper, writeHelper, networkConfiguration, token);
-        var relationshipProcessor = new EntityRelationshipProcessor(referencedEntities);
+        var processorContext = new ProcessorContext(sequences, _storageOptionsMonitor.CurrentValue, readHelper, writeHelper, networkConfiguration, token);
+
+        // Have to be created here as we're sharing them between
+        // - ledgerTransactionProcessor (produces manifest class for transaction)
+        // - LedgerTransactionMarkersProcessor (produces markers for manifest addresses and markers for manifest classes)
         var manifestProcessor = new ManifestProcessor(processorContext, referencedEntities, networkConfiguration);
+
+        // Have to be created here as we're sharing them between
+        // - ledgerTransactionProcessor (produces affected global entities per transaction)
+        // - LedgerTransactionMarkersProcessor (produces markers affected global entities)
         var affectedGlobalEntitiesProcessor = new AffectedGlobalEntitiesProcessor(processorContext, referencedEntities, networkConfiguration);
 
-        var ledgerTransactionMarkersProcessor = new LedgerTransactionMarkersProcessor(
+        // Created explicitly here not as part of processors list as it's completely different processor and one of it's own.
+        // Better to call it explicitly.
+        var entityRelationshipProcessor = new EntityRelationshipProcessor(referencedEntities);
+
+        // This processor has to be assigned here as we're using it to GetSummaryOfLastProcessedTransaction()
+        // Can't be created as item in processors list.
+        var ledgerTransactionProcessor = new LedgerTransactionProcessor(
+            processorContext,
+            _clock,
+            referencedEntities,
             manifestProcessor,
             affectedGlobalEntitiesProcessor,
-            processorContext,
-            referencedEntities,
             writeHelper,
-            networkConfiguration);
+            ledgerExtension.LatestTransactionSummary);
+
+        var processors = new List<IProcessorBase>
+        {
+            ledgerTransactionProcessor,
+            new LedgerTransactionMarkersProcessor(manifestProcessor, affectedGlobalEntitiesProcessor, processorContext, referencedEntities, writeHelper, networkConfiguration),
+            new ResourceSupplyProcessor(processorContext),
+            new EntityStateProcessor(processorContext, referencedEntities),
+            new EntityMetadataProcessor(processorContext),
+            new EntitySchemaProcessor(processorContext, referencedEntities),
+            new ComponentMethodRoyaltyProcessor(processorContext),
+            new EntityRoleAssignmentProcessor(processorContext),
+            new EntitiesByRoleRequirementProcessor(processorContext, dbContext, referencedEntities, _ledgerProcessorsOptionsMonitor, _observers, _entitiesByRoleRequirementProcessorLogger),
+            new PackageCodeProcessor(processorContext),
+            new PackageBlueprintProcessor(processorContext, referencedEntities),
+            new AccountAuthorizedDepositorsProcessor(processorContext, referencedEntities),
+            new AccountResourcePreferenceRulesProcessor(processorContext, referencedEntities),
+            new AccountDefaultDepositRuleProcessor(processorContext),
+            new KeyValueStoreProcessor(processorContext),
+            new ValidatorProcessor(processorContext, referencedEntities),
+            new ValidatorEmissionProcessor(processorContext),
+            new AccountLockerProcessor(processorContext, referencedEntities),
+            new StandardMetadataProcessor(processorContext, referencedEntities),
+            new EntityResourceProcessor(processorContext, dbContext, _observers),
+            new VaultProcessor(processorContext),
+            new ImplicitRequirementsProcessor(processorContext, referencedEntities, dbContext, _observers),
+        };
 
         // step: scan for any referenced entities
         {
@@ -280,6 +327,8 @@ UPDATE pending_transactions
             referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.TransactionTracker);
             referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.ConsensusManager);
             referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.Xrd);
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.Secp256k1SignatureVirtualBadge);
+            referencedEntities.MarkSeenAddress((EntityAddress)networkConfiguration.WellKnownAddresses.Ed25519SignatureVirtualBadge);
 
             foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
             {
@@ -289,7 +338,10 @@ UPDATE pending_transactions
 
                 try
                 {
-                    ledgerTransactionMarkersProcessor.OnTransactionScan(committedTransaction, stateVersion);
+                    foreach (var processor in processors.OfType<ITransactionScanProcessor>())
+                    {
+                        processor.OnTransactionScan(committedTransaction, stateVersion);
+                    }
 
                     foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                     {
@@ -424,7 +476,12 @@ UPDATE pending_transactions
                                 });
                         }
 
-                        relationshipProcessor.OnUpsertScan(substate, referencedEntity, stateVersion);
+                        entityRelationshipProcessor.OnUpsertScan(substate, referencedEntity, stateVersion);
+
+                        foreach (var processor in processors.OfType<ISubstateScanUpsertProcessor>())
+                        {
+                            processor.OnUpsertScan(substate, referencedEntity, stateVersion);
+                        }
                     }
 
                     foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -456,7 +513,7 @@ UPDATE pending_transactions
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to process transaction {StateVersion} at referenced entities scan stage", stateVersion);
+                    _logger.LogError(ex, "Failed to process transaction with state version: {StateVersion} at referenced entities scan stage", stateVersion);
                     throw;
                 }
             }
@@ -610,39 +667,6 @@ UPDATE pending_transactions
             await _observers.ForEachAsync(x => x.StageCompleted("resolve_and_create_entities", sw.Elapsed, null));
         }
 
-        var ledgerTransactionProcessor = new LedgerTransactionProcessor(
-            processorContext,
-            _clock,
-            referencedEntities,
-            manifestProcessor,
-            affectedGlobalEntitiesProcessor,
-            writeHelper,
-            ledgerExtension.LatestTransactionSummary);
-
-        var processors = new List<IProcessorBase>
-        {
-            ledgerTransactionProcessor,
-            ledgerTransactionMarkersProcessor,
-            new ResourceSupplyProcessor(processorContext),
-            new EntityStateProcessor(processorContext, referencedEntities),
-            new EntityMetadataProcessor(processorContext),
-            new EntitySchemaProcessor(processorContext, referencedEntities),
-            new ComponentMethodRoyaltyProcessor(processorContext),
-            new EntityRoleAssignmentProcessor(processorContext),
-            new PackageCodeProcessor(processorContext),
-            new PackageBlueprintProcessor(processorContext, referencedEntities),
-            new AccountAuthorizedDepositorsProcessor(processorContext, referencedEntities),
-            new AccountResourcePreferenceRulesProcessor(processorContext, referencedEntities),
-            new AccountDefaultDepositRuleProcessor(processorContext),
-            new KeyValueStoreProcessor(processorContext),
-            new ValidatorProcessor(processorContext, referencedEntities),
-            new ValidatorEmissionProcessor(processorContext),
-            new AccountLockerProcessor(processorContext, referencedEntities),
-            new StandardMetadataProcessor(processorContext, referencedEntities),
-            new EntityResourceProcessor(processorContext, dbContext, _observers),
-            new VaultProcessor(processorContext),
-        };
-
         // step: scan all substates & events to figure out changes
         {
             var sw = Stopwatch.StartNew();
@@ -652,8 +676,11 @@ UPDATE pending_transactions
                 var stateVersion = committedTransaction.ResultantStateIdentifiers.StateVersion;
                 var stateUpdates = committedTransaction.Receipt.StateUpdates;
                 var events = committedTransaction.Receipt.Events ?? new List<CoreModel.Event>();
-                ledgerTransactionMarkersProcessor.VisitTransaction(committedTransaction, stateVersion);
-                ledgerTransactionProcessor.VisitTransaction(committedTransaction, stateVersion);
+
+                foreach (var processor in processors.OfType<ITransactionProcessor>())
+                {
+                    processor.VisitTransaction(committedTransaction, stateVersion);
+                }
 
                 try
                 {
@@ -672,8 +699,6 @@ UPDATE pending_transactions
                     {
                         var substateId = deletedSubstate.SubstateId;
                         var referencedEntity = referencedEntities.GetOrAdd((EntityAddress)substateId.EntityAddress, ea => new ReferencedEntity(ea, substateId.EntityType, stateVersion));
-
-                        ledgerTransactionMarkersProcessor.VisitDelete(substateId, referencedEntity, stateVersion);
 
                         foreach (var processor in processors.OfType<ISubstateDeleteProcessor>())
                         {
@@ -707,7 +732,8 @@ UPDATE pending_transactions
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to process transaction {StateVersion} at substate processing stage", stateVersion);
+                    var x = stateVersion;
+                    _logger.LogError(ex, "Failed to process transaction with state version: {StateVersion} at substate processing stage", stateVersion);
                     throw;
                 }
             }

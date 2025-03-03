@@ -182,7 +182,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
         }
 
         var coreRequest = new CoreModel.TransactionPreviewRequest(
-            network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
+            network: _networkConfigurationProvider.GetNetworkConfiguration().Name,
             manifest: request.Manifest,
             blobsHex: request.BlobsHex,
             startEpochInclusive: request.StartEpochInclusive,
@@ -231,7 +231,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
             disableAuthChecks: request.Flags.DisableAuthChecks);
 
         var coreRequest = new CoreModel.TransactionPreviewV2Request(
-            network: (await _networkConfigurationProvider.GetNetworkConfiguration(token)).Name,
+            network: _networkConfigurationProvider.GetNetworkConfiguration().Name,
             previewTransaction: MapPreviewTransaction(request.PreviewTransaction),
             flags: coreRequestFlags,
             options: new CoreModel.TransactionPreviewV2ResponseOptions(
@@ -251,7 +251,7 @@ internal class TransactionPreviewService : ITransactionPreviewService
                 radixEngineToolkitReceipt: coreResponse.RadixEngineToolkitReceipt,
                 atLedgerStateVersion: coreResponse.AtLedgerState.StateVersion,
                 receipt: coreResponse.Receipt,
-                logs: coreResponse.Logs?.Select(l => new GatewayModel.TransactionPreviewResponseLogsInner(l.Level, l.Message)).ToList());
+                logs: coreResponse.Logs?.Select(l => new GatewayModel.TransactionPreviewV2ResponseLogsInner(l.Level, l.Message)).ToList());
         }
 
         throw InvalidRequestException.FromOtherError(result.FailureResponse.Message);

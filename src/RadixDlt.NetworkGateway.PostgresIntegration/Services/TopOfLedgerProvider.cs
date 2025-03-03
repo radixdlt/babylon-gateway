@@ -118,7 +118,7 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
             .FirstOrDefaultAsync(token);
 
         return lastTransaction == null
-            ? await PreGenesisTransactionSummary()
+            ? PreGenesisTransactionSummary()
             : new TransactionSummary(
                 StateVersion: lastTransaction.StateVersion,
                 RoundTimestamp: lastTransaction.RoundTimestamp,
@@ -131,7 +131,7 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
             );
     }
 
-    private async Task<TransactionSummary> PreGenesisTransactionSummary()
+    private TransactionSummary PreGenesisTransactionSummary()
     {
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
@@ -139,8 +139,8 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
             RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,
-            Epoch: (await _networkConfigurationProvider.GetNetworkConfiguration()).GenesisEpoch,
-            RoundInEpoch: (await _networkConfigurationProvider.GetNetworkConfiguration()).GenesisRound,
+            Epoch: _networkConfigurationProvider.GetNetworkConfiguration().GenesisEpoch,
+            RoundInEpoch: _networkConfigurationProvider.GetNetworkConfiguration().GenesisRound,
             IndexInEpoch: -1, // invalid, but we increase it by one to in ProcessTransactions
             IndexInRound: -1 // invalid, but we increase it by one to in ProcessTransactions
         );

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.9.2
+  version: v1.10.0
   title: Radix Gateway API - Babylon
   license:
     name: The Radix License, Version 1.0
@@ -619,7 +619,7 @@ tags:
 
       * `manifest_accounts_deposited_into_filter` - Similar to withdrawn, but will return only transactions with a manifest containing deposits to the given accounts.
 
-      * `manifest_resources_filter` - Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
+      * `manifest_resources_filter` - Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage). We recommend that integrators use `balance_change_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
 
       * `manifest_badges_presented_filter` - Allows specifying array of badge resource addresses. If specified, the response will contain only transactions where the given badges were presented.
 
@@ -634,6 +634,10 @@ tags:
       * `event_global_emitters_filter` - Allows specifying an array of global addresses. If specified, the response will contain transactions in which all entities emitted events. If an event was published by an internal entity, it is going to be indexed as it is a global ancestor. For performance reasons events published by consensus manager and native XRD resource are excluded from that filter.
 
       * `events_filter` - Filters the transaction stream to transactions which emitted at least one event matching each filter (each filter can be satisfied by a different event). Currently *only* deposit and withdrawal events emitted by an internal vault entity are tracked. For the purpose of filtering, the emitter address is replaced by the global ancestor of the emitter, for example, the top-level account / component which contains the vault which emitted the event.
+
+      * `balance_change_resources_filter` - Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend that integrators use this instead of the `manifest_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
+
+      * `transaction_status_filter` - Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
 
       Each filter is a complex object where you can specify:
       - `event` (required) - the event tag. Currently only the following tags are supported:
@@ -1181,6 +1185,109 @@ tags:
 
       In our case, we may want to look up information about the vault (for example, the vault's resource address and balance).
       This can be done with the `/state/entity/details` endpoint.
+
+      ## Detailed Events Explained
+
+      The detailed events feature provides additional context and data to the regular event model returned by the `/transaction/committed-details` and `/stream/transactions` endpoints. To include it in the response, enable the `detailed_events` opt-in.
+
+      i.e:
+        ```json
+        /transaction/committed-details
+
+        {
+          "intent_hash": "txid_tdx_2_1g42eke90x4yhur505kt3hthhaflyc7fmce5p09jwr6wglw35qrus6w34tw",
+          "opt_ins": {
+            "detailed_events": true
+          }
+        }
+        ```
+
+      Let's compare an example event returned in both models.
+
+      ### Example Event JSON
+
+      **Legacy Event Model**
+      ```json
+      {
+        "name": "DepositEvent",
+        "emitter": {
+          "type": "Method",
+          "entity": {
+            "is_global": false,
+            "entity_type": "InternalFungibleVault",
+            "entity_address": "internal_vault_tdx_2_1tr3jllkjd0h0k7sxtj5fy87fw6sfl33yc89j7fzwz0qp29k4dljgxv"
+          },
+          "object_module_id": "Main"
+        },
+        "data": {
+          "fields": [
+            {
+              "value": "10000",
+              "kind": "Decimal",
+              "field_name": "amount"
+            }
+          ],
+          "kind": "Tuple",
+          "type_name": "DepositEvent"
+        }
+      }
+      ```
+
+      **Detailed Event Model**
+      ```json
+      {
+        "identifier": {
+          "package": "package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes",
+          "blueprint": "FungibleVault",
+          "event": "DepositEvent"
+        },
+        "payload_type_definition": {
+          "local_type_id": 25,
+          "entity": "package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes",
+          "schema_hash_hex": "462a3fea283117aab2b01c297812bdc0fa9060b29eb5e68b847f361bc1201933",
+          "kind": "SchemaLocal"
+        },
+        "emitter": {
+          "method_emitter": {
+            "entity": "internal_vault_tdx_2_1tr3jllkjd0h0k7sxtj5fy87fw6sfl33yc89j7fzwz0qp29k4dljgxv",
+            "module": "Main"
+          },
+          "outer_emitter": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+          "global_emitter": "account_tdx_2_12x6f0l694e9fhcvcaqw9vs0mnp8m4k74cqkdkgxg2w8rvp4k63ru7r",
+          "type": "EntityMethod"
+        },
+        "payload": {
+          "programmatic_json": {
+            "fields": [
+              {
+                "value": "10000",
+                "kind": "Decimal",
+                "field_name": "amount"
+              }
+            ],
+            "kind": "Tuple",
+            "type_name": "DepositEvent"
+          }
+        }
+      }
+      ```
+
+      ### Comparison
+
+      #### Identifier Data
+      The legacy event model provides only the event name (`DepositEvent`). In contrast, the detailed event model includes the blueprint name (`FungibleVault`) and the package containing this blueprint (`package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes`).
+
+      #### Emitter Data
+      The detailed event model adds two properties covering the outer object (if it exists) and global ancestor of the emitter in the state tree. As an example, for events emitted by account vaults, this translates to:
+        - `outer_emitter`: The resource address of the asset held in the vault.
+        - `global_emitter`: The account that owns the vault emitting the event.
+
+      The detailed event model omits the `is_global` and `entity_type` fields because these can be inferred directly from the returned `entity` address.
+
+      #### Payload
+      Both models provide the same payload data. In both cases, the payload is decoded to programmatic JSON using a schema. In the detailed event model, this data is additionally wrapped in a `programmatic_json` field.
+
+      A new addition in the detailed event model is the `payload_type_definition` field, which provides information about the event schema. In the example above, this field points to a schema (`SchemaLocal`) with a `local_type_id` of 25. This schema is defined in `package_tdx_2_1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxmn4mes` package and has a hash of `462a3fea283117aab2b01c297812bdc0fa9060b29eb5e68b847f361bc1201933`.
 
   - name: Status
     x-displayName: Status Endpoints
@@ -1970,8 +2077,10 @@ paths:
       description: |
         A paginated endpoint to discover which global entities hold the most of a given resource.
         More specifically, it returns a page of global entities which hold the given resource, ordered descending by the total fungible balance / total count of non-fungibles stored in vaults in the state tree of that entity (excluding unclaimed royalty balances).
+
         This endpoint operates only at the **current state version**, it is not possible to browse historical data.
         Because of that, it is not possible to offer stable pagination as data constantly changes. Balances might change between pages being read, which might result in gaps or some entries being returned twice.
+
         Under default Gateway configuration, up to 100 entries are returned per response. This can be increased up to 1000 entries per page with the `limit_per_page` parameter.
       tags:
         - Extensions
@@ -1991,6 +2100,112 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
+
+  /extensions/entities-by-role-requirement/page:
+    post:
+      operationId: EntitiesByRoleRequirementPage
+      summary: Get entities by role requirement page
+      description: |
+        Paginated endpoint returns a page of global entities that have ever used the provided requirement (such as a resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
+        This endpoint allows querying by a single requirement. By default it returns up to 100 entries are returned per response. This limit can be increased to a maximum of 1000 entries per page using the `limit_per_page` parameter.
+        To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.
+
+        To lookup multiple requirements, please call the `/extensions/entities-by-role-requirement/lookup` endpoint.
+
+        Behaviour:
+        - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
+        - It may include entities that no longer use the requirement as part of an access rule.
+        - If no entities are found, an empty list will be returned.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementPageRequest"
+      responses:
+        "200":
+          description: List of entities that have ever used the queried requirement in their access rules.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementPageResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /extensions/entities-by-role-requirement/lookup:
+    post:
+      operationId: EntitiesByRoleRequirementLookup
+      summary: Get entities by role requirement lookup
+      description: |
+        This endpoint is intended to query for entities that have ever used a given requirement (resource or non-fungible global ID) in their access rules (blueprint authentication templates, owner roles, or role assignments).
+        This endpoint allows querying by multiple requirements. A maximum of `50` requirements can be queried. A maximum of 20 entities per requirement will be returned.
+        To retrieve subsequent pages, use the returned cursor and call the `/extensions/entities-by-role-requirement/page` endpoint.
+
+        Behaviour:
+        - Entities are returned in ascending order by the state version in which the requirement was first observed on the ledger.
+        - It may include entities that no longer use the requirement as part of an access rule.
+        - If no entities are found, an empty list will be returned.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementLookupRequest"
+      responses:
+        "200":
+          description: List of entities, per requested requirement, that have ever used the queried requirements in their access rules.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementLookupResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /extensions/implicit-requirements/lookup:
+    post:
+      operationId: ImplicitRequirementsLookup
+      summary: Resolve implicit requirement target from global non-fungible id
+      description: |
+        Access rules can include [implicit requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements) referencing special system-reserved resource addresses, which have specific meanings for the Radix Engine and are not part of the standard authorization zone system.
+        These implicit requirements typically store their details as a hash, which means the subject of the requirement can't be easily resolved. This is where this endpoint comes in. It can resolve the subject of the implicit requirements, using a database of reverse hash lookups populated from ledger data.
+
+        The following [resource addresses](https://docs.radixdlt.com/docs/well-known-addresses) are supported:
+        - **Secp256k1 Signature Resource**
+        - **Ed25519 Signature Resource**
+        - **Package of Direct Caller Resource**
+        - **Global Caller Resource**
+        - **System Execution Resource**
+
+        When querying, you must provide a pair of the following for each requirement to resolve:
+        - `resource_address` (one of the above)
+        - `non_fungible_id`,  of the requirement.
+
+        You can query a maximum of `100` implicit requirements at a time.
+
+        See the documentation on
+        [implicit-requirements](https://docs.radixdlt.com/docs/advanced-accessrules#implicit-requirements)
+        for more information.
+      tags:
+        - Extensions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImplicitRequirementsLookupRequest"
+      responses:
+        "200":
+          description: List of resolved implicit requirements.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImplicitRequirementsLookupResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
 
 components:
   responses:
@@ -2311,6 +2526,23 @@ components:
         - Global
         - Vault
 
+    SborTypeKind:
+      type: string
+      description: |
+        Kind of SBOR type.
+
+        - If `WellKnown`, then it is a pointer to a well known scrypto type with that ID,
+        - If `SchemaLocal`, then it is an index into the given schema.
+      enum:
+        - SchemaLocal
+        - WellKnown
+
+    SchemaTypeId:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 4294967295
+
     ScryptoSborValue:
       type: object
       required:
@@ -2392,7 +2624,7 @@ components:
           $ref: "#/components/schemas/Address"
 
     TwoWayLinkedEntitiesCollection:
-      description: A collection of two-way linked (resolved & verified) entities linked to the entity defining this collection.
+      description: A collection of directly two-way linked (resolved & verified) entities linked to the entity defining this collection.
       type: object
       required:
         - items
@@ -2408,6 +2640,13 @@ components:
       properties:
         entity_address:
           $ref: "#/components/schemas/Address"
+        auto_link_blueprints:
+          description: |
+            List of blueprints which, when used to instantiate a component, will automatically link the created components to the dApp.
+            Returned only for packages.
+          type: array
+          items:
+            type: string
 
     TwoWayLinkedDappOnLedgerDetails:
       type: object
@@ -2583,8 +2822,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ComponentEntityRoleAssignmentEntry"
-
-
 
     ComponentEntityRoleAssignmentEntry:
       type: object
@@ -2931,14 +3168,9 @@ components:
       type: object
       required:
         - badge_type
-        - resource_address
       properties:
         badge_type:
           $ref: "#/components/schemas/AccountAuthorizedDepositorBadgeType"
-        resource_address:
-          # That is part of parent type because moving it to child broke OpenAPI generator and removed some other types:
-          # MetadataNonFungibleGlobalIdValueAllOf StateNonFungibleIdsRequestAllOf  MetadataNonFungibleGlobalIdArrayValueAllOf and MetadataNonFungibleGlobalIdArrayValue were affected
-          $ref: "#/components/schemas/Address"
       discriminator:
         propertyName: badge_type
         mapping:
@@ -2949,13 +3181,21 @@ components:
       allOf:
         - $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
         - type: object
+          required:
+            - resource_address
+          properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
     AccountDepositPreValidationNonFungibleBadge:
       allOf:
         - $ref: "#/components/schemas/TransactionAccountDepositPreValidationAuthorizedDepositorBadge"
         - type: object
           required:
+            - resource_address
             - non_fungible_id
           properties:
+            resource_address:
+              $ref: "#/components/schemas/Address"
             non_fungible_id:
               $ref: "#/components/schemas/NonFungibleId"
 
@@ -3182,15 +3422,191 @@ components:
             The manifest line-by-line engine return data (only present if `status` is `CommittedSuccess`).
             This type is defined in the Core API as `SborData`. See the Core API documentation for more details.
         events:
-          description: Events emitted by a transaction.
+          deprecated: true
+          description: Events emitted by a transaction. Please use the `detailed_events` instead, as it provides an enriched model with context and additional data.
           type: array
           items:
             $ref: "#/components/schemas/EventsItem"
+        detailed_events:
+          description: |
+            Events emitted by a transaction, enriched with additional context and data.
 
+            For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained).
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailedEventsItem"
         error_message:
           description: Error message (only present if status is `Failed` or `Rejected`)
           type: string
           nullable: true
+
+    DetailedEventsItem:
+      type: object
+      required:
+        - identifier
+        - payload_type_definition
+        - emitter
+        - payload
+      properties:
+        identifier:
+          $ref: "#/components/schemas/DetailedEventIdentifier"
+        payload_type_definition:
+          $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        emitter:
+          $ref: "#/components/schemas/DetailedEventEmitter"
+        payload:
+          $ref: "#/components/schemas/DetailedEventPayload"
+
+    DetailedEventIdentifier:
+      description: Identifier of an event.
+      type: object
+      required:
+        - package
+        - blueprint
+        - event
+      properties:
+        package:
+          # TODO: Due to 3.0 open api spec limitation we can't use ref here, it should reuse $ref: "#/components/schemas/Address"
+          description: |
+            The address of the published package that defines the event.
+
+            Bech32m-encoded human readable version of the address.
+          type: string
+        blueprint:
+          description: The blueprint that defines the event.
+          type: string
+        event:
+          description: Event name.
+          type: string
+
+    DetailedEventPayloadTypeDefinition:
+      description: Detailed information about the event's payload type.
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          $ref: "#/components/schemas/SborTypeKind"
+      discriminator:
+        propertyName: kind
+        mapping:
+          SchemaLocal: "#/components/schemas/SchemaLocalEventPayloadTypeDefinition"
+          WellKnown: "#/components/schemas/WellKnownEventPayloadTypeDefinition"
+
+    WellKnownEventPayloadTypeDefinition:
+      description: Reference to a well-known type that defines the schema of an event.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        - type: object
+          required:
+            - well_known_type_id
+          properties:
+            well_known_type_id:
+              $ref: "#/components/schemas/SchemaTypeId"
+
+    SchemaLocalEventPayloadTypeDefinition:
+      description: Reference to a local schema type that defines the schema of an event.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventPayloadTypeDefinition"
+        - type: object
+          required:
+            - local_type_id
+            - entity
+            - schema_hash_hex
+          properties:
+            local_type_id:
+              $ref: "#/components/schemas/SchemaTypeId"
+            entity:
+              $ref: "#/components/schemas/Address"
+            schema_hash_hex:
+              $ref: "#/components/schemas/HexString"
+
+    EventEmitterType:
+      type: string
+      enum:
+        - EntityMethod
+        - PackageFunction
+
+    DetailedEventEmitter:
+      description: Detailed information about the event emitter.
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/EventEmitterType"
+      discriminator:
+        propertyName: type
+        mapping:
+          EntityMethod: "#/components/schemas/EntityMethodEventEmitter"
+          PackageFunction: "#/components/schemas/PackageFunctionEventEmitter"
+
+    EntityMethodEventEmitter:
+      description: Details of the entity method's event emitter.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventEmitter"
+        - type: object
+      required:
+        - method_emitter
+        - global_emitter
+      properties:
+        method_emitter:
+          $ref: "#/components/schemas/MethodEmitter"
+        outer_emitter:
+          # TODO: Due to 3.0 open api spec limitation we can't use ref here, it should reuse $ref: "#/components/schemas/Address"
+          description: |
+            The address of the outer object of the emitter. For example, for events emitted by vaults, this will be the resource address; for events emitted by validators, it will be the consensus manager address.
+
+            Bech32m-encoded human readable version of the address.
+          type: string
+        global_emitter:
+          # TODO: Due to 3.0 open api spec limitation we can't use ref here, it should reuse $ref: "#/components/schemas/Address"
+          description: |
+            The address of the global ancestor of the entity emitting the event (self if the entity emitting the event is global).
+
+            Bech32m-encoded human readable version of the address.
+          type: string
+
+    MethodEmitter:
+      description: Details of the component module method that emitted the event.
+      type: object
+      required:
+        - entity
+        - module
+      properties:
+        entity:
+          $ref: "#/components/schemas/Address"
+        module:
+          type: string
+
+    FunctionEmitter:
+      description: Details of the blueprint function that emitted the event.
+      type: object
+      required:
+        - blueprint
+      properties:
+        blueprint:
+          type: string
+
+    PackageFunctionEventEmitter:
+      description: Details of the package function's event emitter.
+      allOf:
+        - $ref: "#/components/schemas/DetailedEventEmitter"
+        - type: object
+      required:
+        - function_emitter
+      properties:
+        function_emitter:
+          $ref: "#/components/schemas/FunctionEmitter"
+
+    DetailedEventPayload:
+      description: Event payload decoded into Programmatic JSON using its schema.
+      type: object
+      required:
+        - programmatic_json
+      properties:
+        programmatic_json:
+          type: object
 
     EventsItem:
       type: object
@@ -3254,6 +3670,140 @@ components:
           type: integer
           format: int64
 
+    NonFungibleGlobalId:
+      type: object
+      required:
+        - resource_address
+        - non_fungible_id
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        non_fungible_id:
+          $ref: "#/components/schemas/NonFungibleId"
+
+    EntitiesByRoleRequirementItem:
+      type: object
+      required:
+        - first_seen_state_version
+        - entity_address
+      properties:
+        entity_address:
+          $ref: "#/components/schemas/Address"
+        first_seen_state_version:
+          type: integer
+          format: int64
+
+    ResolvedImplicitRequirementType:
+      type: string
+      enum:
+        - Secp256k1PublicKey
+        - Ed25519PublicKey
+        - GlobalCallerBlueprint
+        - GlobalCallerEntity
+        - PackageOfDirectCaller
+        - ProtocolExecution
+        - ValidatorExecution
+    ResolvedImplicitRequirement:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: "#/components/schemas/ResolvedImplicitRequirementType"
+      discriminator:
+        propertyName: type
+        mapping:
+          Secp256k1PublicKey: "#/components/schemas/ResolvedSecp256k1PublicKeyImplicitRequirement"
+          Ed25519PublicKey: "#/components/schemas/ResolvedEd25519PublicKeyImplicitRequirement"
+          GlobalCallerBlueprint: "#/components/schemas/ResolvedGlobalCallerBlueprintImplicitRequirement"
+          GlobalCallerEntity: "#/components/schemas/ResolvedGlobalCallerEntityImplicitRequirement"
+          PackageOfDirectCaller: "#/components/schemas/ResolvedPackageOfDirectCallerImplicitRequirement"
+          ProtocolExecution: "#/components/schemas/ResolvedProtocolExecutionImplicitRequirement"
+          ValidatorExecution: "#/components/schemas/ResolvedValidatorExecutionImplicitRequirement"
+
+    ResolvedProtocolExecutionImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+
+    ResolvedValidatorExecutionImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+
+    ResolvedSecp256k1PublicKeyImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - first_seen_state_version
+            - public_key_bytes_hex
+          properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
+            public_key_bytes_hex:
+              $ref: "#/components/schemas/HexString"
+
+    ResolvedEd25519PublicKeyImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - public_key_bytes_hex
+            - first_seen_state_version
+          properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
+            public_key_bytes_hex:
+              $ref: "#/components/schemas/HexString"
+
+    ResolvedGlobalCallerBlueprintImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - first_seen_state_version
+            - package_address
+            - blueprint_name
+          properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
+            package_address:
+              $ref: "#/components/schemas/Address"
+            blueprint_name:
+              type: string
+
+    ResolvedGlobalCallerEntityImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - first_seen_state_version
+            - entity_address
+          properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
+            entity_address:
+              $ref: "#/components/schemas/Address"
+
+    ResolvedPackageOfDirectCallerImplicitRequirement:
+      allOf:
+        - $ref: "#/components/schemas/ResolvedImplicitRequirement"
+        - type: object
+          required:
+            - first_seen_state_version
+            - package_address
+          properties:
+            first_seen_state_version:
+              type: integer
+              format: int64
+            package_address:
+              $ref: "#/components/schemas/Address"
+
     ResourceHoldersCollection:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
@@ -3302,7 +3852,6 @@ components:
             amount:
               $ref: "#/components/schemas/BigDecimal"
 
-
     ResourceHoldersCollectionNonFungibleResourceItem:
       allOf:
         - $ref: "#/components/schemas/ResourceHoldersCollectionItem"
@@ -3313,7 +3862,6 @@ components:
             non_fungible_ids_count:
               type: integer
               format: int64
-
 
     ValidatorCollection:
       allOf:
@@ -4134,7 +4682,15 @@ components:
           type: boolean
           default: false
         receipt_events:
-          description: if set to `true`, events inside receipt object is returned.
+          description: if set to `true`, events inside receipt object is returned. Please use the `detailed_events` instead, as it provides an enriched model with context and additional data.
+          deprecated: true
+          type: boolean
+          default: false
+        detailed_events:
+          description: |
+            if set to `true`, detailed events object is returned.
+
+            For more information please visit the [Detailed Events docs](#section/Detailed-Events-Explained).
           type: boolean
           default: false
         receipt_output:
@@ -4319,7 +4875,7 @@ components:
               items:
                 $ref: "#/components/schemas/Address"
             manifest_resources_filter:
-              description: Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage).
+              description: Allows specifying array of resource addresses. If specified, the response will contain only transactions containing the given resources in the manifest (regardless of their usage). We recommend that integrators use `balance_change_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
               type: array
               items:
                 $ref: "#/components/schemas/Address"
@@ -4359,6 +4915,19 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Address"
+            balance_change_resources_filter:
+              description: Allows filtering to transactions which included non-fee related balance changes for all provided resources. Defaults to `[]`. We recommend that integrators use this instead of the `manifest_resources_filter` in most cases, as it also captures resource changes that are not specified in the manifest.
+              type: array
+              items:
+                $ref: "#/components/schemas/Address"
+            transaction_status_filter:
+              description: Allows filtering by the transaction commit status (`Success`, `Failure`, `All`). Defaults to `All`.
+              type: string
+              default: All
+              enum:
+                - Success
+                - Failure
+                - All
             order:
               description: Configures the order of returned result set. Defaults to `desc`.
               type: string
@@ -4683,7 +5252,19 @@ components:
             royalty_config:
               $ref: "#/components/schemas/ComponentRoyaltyConfig"
             two_way_linked_dapp_address:
-              description: Two-way linked (resolved & verified) dApp address, if any. Applicable to non-Account dApp components only.
+              description: |
+                Verified two-way link to the dApp address, if available. Resolves to `direct_linked_dapp_address` if it exists; otherwise, it falls back to `blueprint_linked_dapp_address`.
+                See the [resolved link](https://docs.radixdlt.com/docs/metadata-for-verification#resolved-link) documentation for details.
+              $ref: "#/components/schemas/Address"
+            direct_linked_dapp_address:
+              description: |
+                Verified direct two-way link to the dApp address, if available.
+                See the documentation on [direct link](https://docs.radixdlt.com/docs/metadata-for-verification#direct-link) for more information.
+              $ref: "#/components/schemas/Address"
+            blueprint_linked_dapp_address :
+              description: |
+                Verified blueprint two-way link to the dApp address, if available.
+                See the documentation on [direct link](https://docs.radixdlt.com/docs/metadata-for-verification#blueprint-link) for more information.
               $ref: "#/components/schemas/Address"
             two_way_linked_dapp_details:
               description: Two-way linked (resolved & verified) dApp details. Applicable to dApp definition accounts only and limited to on-ledger information only.
@@ -5357,6 +5938,114 @@ components:
             validators:
               $ref: "#/components/schemas/ValidatorUptimeCollection"
 
+    EntitiesByRoleRequirementPageRequest:
+      allOf:
+        - $ref: "#/components/schemas/CursorLimitMixin"
+        - $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+      example:
+        limit_per_page: 100
+        resource_address: "<sample-requirement-resource-address>"
+        non_fungible_id: "<sample-requirement-non-fungible-id>"
+
+    EntitiesByRoleRequirementRequestRequirement:
+      type: object
+      required:
+        - resource_address
+      properties:
+        resource_address:
+          $ref: "#/components/schemas/Address"
+        non_fungible_id:
+          $ref: "#/components/schemas/NonFungibleId"
+
+    EntitiesByRoleRequirementPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - entities
+          properties:
+            entities:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+
+    EntitiesByRoleRequirementLookupRequest:
+      allOf:
+        - type: object
+          required:
+            - requirements
+          properties:
+            requirements:
+              type: array
+              description: limited to max 50 items.
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+      example:
+        requirements:
+          - resource_address: "<sample-requirement-resource-address>"
+            non_fungible_id: "<sample-requirement-non-fungible-id>"
+
+    EntitiesByRoleRequirementLookupResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EntitiesByRoleRequirementLookupCollection"
+
+    EntitiesByRoleRequirementLookupCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - entities
+            - requirement
+          properties:
+            requirement:
+              $ref: "#/components/schemas/EntitiesByRoleRequirementRequestRequirement"
+            entities:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntitiesByRoleRequirementItem"
+
+    ImplicitRequirementsLookupRequest:
+      allOf:
+        - type: object
+          required:
+            - requirements
+          properties:
+            requirements:
+              type: array
+              description: limited to max 100 items.
+              items:
+                $ref: "#/components/schemas/NonFungibleGlobalId"
+      example:
+        requirements:
+          - resource_address: "<sample-implicit-requirement-resource-address>"
+            non_fungible_id: "<sample-implicit-requirement-non-fungible-id>"
+
+    ImplicitRequirementsLookupResponse:
+      type: object
+      required:
+        - resolved_requirements
+      properties:
+        resolved_requirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImplicitRequirementsLookupCollectionItem"
+
+    ImplicitRequirementsLookupCollectionItem:
+      type: object
+      required:
+        - requirement
+      properties:
+        requirement:
+          $ref: "#/components/schemas/NonFungibleGlobalId"
+        resolved:
+          $ref: "#/components/schemas/ResolvedImplicitRequirement"
+
     ResourceHoldersRequest:
       allOf:
         - $ref: "#/components/schemas/CursorLimitMixin"
@@ -5370,7 +6059,15 @@ components:
 
     ResourceHoldersResponse:
       allOf:
-        - $ref: "#/components/schemas/ResourceHoldersCollection"
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ResourceHoldersCollectionItem"
 
 
     #
@@ -5867,6 +6564,7 @@ components:
           properties:
             value:
               $ref: "#/components/schemas/PublicKey"
+
     MetadataNonFungibleGlobalIdValue:
       allOf:
         - $ref: "#/components/schemas/MetadataTypedValue"

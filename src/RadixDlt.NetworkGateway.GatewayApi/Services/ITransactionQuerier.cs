@@ -73,8 +73,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ITransactionQuerier
 {
-    Task<(string? RandomIntentHash, string? RandomSubintentHash, long? CurrentEpoch)> GetOpenApiDocumentHandlerDetails(CancellationToken token = default);
-
     Task<TransactionPageWithoutTotal> GetTransactionStream(TransactionStreamPageRequest request, GatewayModel.LedgerState atLedgerState, CancellationToken token = default);
 
     Task<GatewayModel.CommittedTransactionInfo?> LookupCommittedTransaction(
@@ -110,6 +108,8 @@ public sealed record TransactionStreamPageRequest(
 
 public class TransactionStreamPageRequestSearchCriteria
 {
+    public LedgerTransactionStatusFilter Status { get; set; }
+
     public LedgerTransactionKindFilter Kind { get; set; }
 
     public HashSet<LedgerTransactionEventFilter> Events { get; set; } = new();
@@ -129,6 +129,8 @@ public class TransactionStreamPageRequestSearchCriteria
     public HashSet<EntityAddress> AccountsWithoutManifestOwnerMethodCalls { get; set; } = new();
 
     public HashSet<EntityAddress> AccountsWithManifestOwnerMethodCalls { get; set; } = new();
+
+    public HashSet<EntityAddress> BalanceChangeResources { get; set; } = new();
 
     public ManifestClassFilter? ManifestClassFilter { get; set; }
 }

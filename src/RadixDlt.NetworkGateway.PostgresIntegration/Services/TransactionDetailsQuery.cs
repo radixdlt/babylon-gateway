@@ -77,7 +77,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal static class TransactionDetailsQuery
 {
-    internal record MappedReceiptEvent(string Name, string Emitter, byte[] Data, long EntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
+    internal record MappedReceiptEvent(string Name, string Emitter, long EmitterEntityId, byte[] Data, long SchemaEntityId, byte[] SchemaHash, long TypeIndex, SborTypeKind KeyTypeKind);
 
     internal record MappedSubintentData(List<string> ChildSubintentHashes, List<SubintentData> SubintentData);
 
@@ -119,6 +119,7 @@ internal static class TransactionDetailsQuery
 
     private record ReceiptEvents(
         string[] ReceiptEventEmitters,
+        long[] ReceiptEventEmitterEntityIds,
         string[] ReceiptEventNames,
         byte[][] ReceiptEventSbors,
         long[] ReceiptEventSchemaEntityIds,
@@ -138,7 +139,7 @@ internal static class TransactionDetailsQuery
             includeRawHex = optIns.RawHex,
             includeReceiptOutput = optIns.ReceiptOutput,
             includeReceiptStateChanges = optIns.ReceiptStateChanges,
-            includeReceiptEvents = optIns.ReceiptEvents,
+            includeReceiptEvents = optIns.ReceiptEvents || optIns.DetailedEvents,
             includeBalanceChanges = optIns.BalanceChanges,
             includeManifestInstructions = optIns.ManifestInstructions,
             transactionStateVersions = transactionStateVersions,
@@ -185,6 +186,7 @@ SELECT
     CASE WHEN vars.with_balance_changes THEN balance_changes END AS balance_changes,
     CASE WHEN vars.with_manifest_instructions THEN manifest_instructions END AS manifest_instructions,
     CASE WHEN vars.with_receipt_events THEN lte.receipt_event_emitters END AS ReceiptEventEmitters,
+    CASE WHEN vars.with_receipt_events THEN lte.receipt_event_emitter_entity_ids END AS ReceiptEventEmitterEntityIds,
     CASE WHEN vars.with_receipt_events THEN lte.receipt_event_names END AS ReceiptEventNames,
     CASE WHEN vars.with_receipt_events THEN lte.receipt_event_sbors END AS ReceiptEventSbors,
     CASE WHEN vars.with_receipt_events THEN lte.receipt_event_schema_entity_ids END AS ReceiptEventSchemaEntityIds,
@@ -215,6 +217,7 @@ WHERE lt.state_version = ANY(vars.transaction_state_versions)",
                             (_, i) => new MappedReceiptEvent(
                                 events.ReceiptEventNames[i],
                                 events.ReceiptEventEmitters[i],
+                                events.ReceiptEventEmitterEntityIds[i],
                                 events.ReceiptEventSbors[i],
                                 events.ReceiptEventSchemaEntityIds[i],
                                 events.ReceiptEventSchemaHashes[i],

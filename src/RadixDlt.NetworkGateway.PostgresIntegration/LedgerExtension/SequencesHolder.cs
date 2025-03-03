@@ -144,6 +144,10 @@ internal class SequencesHolder
 
     public long ResourceHoldersSequence { get; set; }
 
+    public long ImplicitRequirementsSequence { get; set; }
+
+    public long EntitiesByRoleRequirementSequence { get; set; }
+
     public long EntityResourceEntryDefinitionSequence { get; set; }
 
     public long EntityResourceVaultEntryDefinitionSequence { get; set; }

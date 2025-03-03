@@ -154,6 +154,7 @@ def generate_models(prepared_spec_file, tmp_client_folder, out_location):
          '-i', prepared_spec_file,
          '-o', tmp_client_folder,
          '-t', os.path.join(OPENAPI_GENERATION_FOLDER, 'template-overrides'),
+         '--inline-schema-name-defaults SKIP_SCHEMA_REUSE=true',
          '--additional-properties=supportsES6=true,modelPropertyNaming=original,npmVersion=0.1.0'
     ], should_log=False)
 

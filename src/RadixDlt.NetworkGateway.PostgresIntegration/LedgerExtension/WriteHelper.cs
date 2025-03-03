@@ -134,7 +134,7 @@ internal class WriteHelper : IWriteHelper
         var sw = Stopwatch.GetTimestamp();
 
         await using var writer = await _connection.BeginBinaryImportAsync(
-            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, correlated_entity_relationships, correlated_entity_ids, discriminator, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, non_fungible_data_mutable_fields) FROM STDIN (FORMAT BINARY)",
+            "COPY entities (id, from_state_version, address, is_global, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, outer_object_entity_id, correlated_entity_relationships, correlated_entity_ids, discriminator, blueprint_name, blueprint_version, assigned_module_ids, divisibility, non_fungible_id_type, non_fungible_data_mutable_fields) FROM STDIN (FORMAT BINARY)",
             token);
 
         foreach (var e in entities)
@@ -151,6 +151,7 @@ internal class WriteHelper : IWriteHelper
             await writer.WriteAsync(e.ParentAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.OwnerAncestorId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.GlobalAncestorId, NpgsqlDbType.Bigint, token);
+            await writer.WriteAsync(e.OuterObjectEntityId, NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(e.Correlations.Select(x => x.Relationship).ToArray(), "entity_relationship[]", token);
             await writer.WriteAsync(e.Correlations.Select(x => x.EntityId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
             await writer.WriteAsync(discriminator, "entity_type", token);
@@ -241,6 +242,8 @@ internal class WriteHelper : IWriteHelper
             unverifiedStandardMetadataAggregateHistorySequence = sequences.UnverifiedStandardMetadataAggregateHistorySequence,
             unverifiedStandardMetadataEntryHistorySequence = sequences.UnverifiedStandardMetadataEntryHistorySequence,
             resourceHoldersSequence = sequences.ResourceHoldersSequence,
+            implicitRequirementsSequence = sequences.ImplicitRequirementsSequence,
+            entitiesByRoleRequirementSequence = sequences.EntitiesByRoleRequirementSequence,
             entityResourceEntryDefinitionSequence = sequences.EntityResourceEntryDefinitionSequence,
             entityResourceVaultEntryDefinitionSequence = sequences.EntityResourceVaultEntryDefinitionSequence,
             entityResourceTotalsHistorySequence = sequences.EntityResourceTotalsHistorySequence,
@@ -293,6 +296,8 @@ SELECT
     setval('unverified_standard_metadata_aggregate_history_id_seq', @unverifiedStandardMetadataAggregateHistorySequence),
     setval('unverified_standard_metadata_entry_history_id_seq', @unverifiedStandardMetadataEntryHistorySequence),
     setval('resource_holders_id_seq', @resourceHoldersSequence),
+    setval('implicit_requirements_id_seq', @implicitRequirementsSequence),
+    setval('entities_by_role_requirement_entry_definition_id_seq', @entitiesByRoleRequirementSequence),
     setval('entity_resource_entry_definition_id_seq', @entityResourceEntryDefinitionSequence),
     setval('entity_resource_vault_entry_definition_id_seq', @entityResourceVaultEntryDefinitionSequence),
     setval('entity_resource_totals_history_id_seq', @entityResourceTotalsHistorySequence),

@@ -72,7 +72,22 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-internal class DefaultExtensionsHandler(IResourceHoldersQuerier resourceHoldersQuerier, IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
+public interface IExtensionsHandler
+{
+    Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token);
+
+    Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token);
+
+    Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token);
+
+    Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token);
+}
+
+internal class DefaultExtensionsHandler(
+    IResourceHoldersQuerier resourceHoldersQuerier,
+    IEntitiesByRoleRequirementQuerier entitiesByRoleRequirementQuerier,
+    IImplicitRequirementsQuerier implicitRequirementsQuerier,
+    IOptionsSnapshot<EndpointOptions> endpointConfiguration) : IExtensionsHandler
 {
     public async Task<GatewayModel.ResourceHoldersResponse> ResourceHolders(GatewayModel.ResourceHoldersRequest request, CancellationToken token)
     {
@@ -83,5 +98,30 @@ internal class DefaultExtensionsHandler(IResourceHoldersQuerier resourceHoldersQ
             endpointConfiguration.Value.ResolveResourceHoldersPageSize(request.LimitPerPage),
             cursor,
             token);
+    }
+
+    public async Task<GatewayModel.EntitiesByRoleRequirementPageResponse> EntitiesByRoleRequirementPage(GatewayModel.EntitiesByRoleRequirementPageRequest request, CancellationToken token)
+    {
+        var cursor = GatewayModel.IdBoundaryCoursor.FromCursorString(request.Cursor);
+
+        return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementPage(
+            (EntityAddress)request.ResourceAddress,
+            request.NonFungibleId,
+            endpointConfiguration.Value.ResolvePageSize(request.LimitPerPage),
+            cursor,
+            token);
+    }
+
+    public async Task<GatewayModel.EntitiesByRoleRequirementLookupResponse> EntitiesByRoleRequirementLookup(GatewayModel.EntitiesByRoleRequirementLookupRequest request, CancellationToken token)
+    {
+        return await entitiesByRoleRequirementQuerier.EntitiesByRoleRequirementLookup(
+            request.Requirements,
+            endpointConfiguration.Value.MaxHeavyCollectionsPageSize,
+            token);
+    }
+
+    public async Task<GatewayModel.ImplicitRequirementsLookupResponse> ImplicitRequirementsLookup(GatewayModel.ImplicitRequirementsLookupRequest request, CancellationToken token)
+    {
+        return await implicitRequirementsQuerier.ImplicitRequirementsLookup(request.Requirements, token);
     }
 }

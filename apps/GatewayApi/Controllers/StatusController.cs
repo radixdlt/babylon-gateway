@@ -91,9 +91,9 @@ public sealed class StatusController : ControllerBase
     }
 
     [HttpPost("network-configuration")]
-    public async Task<GatewayModel.NetworkConfigurationResponse> NetworkConfiguration(CancellationToken token)
+    public GatewayModel.NetworkConfigurationResponse NetworkConfiguration()
     {
-        var networkConfiguration = await _networkConfigurationProvider.GetNetworkConfiguration(token);
+        var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
         var wellKnownAddresses = networkConfiguration.WellKnownAddresses;
 
         return new GatewayModel.NetworkConfigurationResponse(

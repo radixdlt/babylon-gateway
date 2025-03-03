@@ -69,4 +69,6 @@ namespace RadixDlt.CoreApiSdk.Model;
 public abstract partial class EventEmitterIdentifier : IEntityAddressPointer
 {
     public abstract IEnumerable<string> GetEntityAddresses();
+
+    public abstract string GetEmitterAddress();
 }
