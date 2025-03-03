@@ -2,7 +2,7 @@
 Release built: _not released yet_
 
 ### Bug fixes
-- Fixed two bugs in two-way links returned from `/state/entity/details`:
+- Fixed two bugs in two-way links returned from `/state/entity/details` (If you are affected and your two-way link is not working, the Radix Console tool https://console.radixdlt.com/configure-metadata can help fix it. You may also consider using the blueprint link feature introduced in that release, though it is not yet supported by the tool and must be set manually). 
   - If one end of the link pointed to an entity without a corresponding metadata key, it was incorrectly considered a valid two-way link.
   - Fixed invalidation after removing a metadata entry on one end. Previously, the link was still considered valid even after the metadata entry was removed.
 
