@@ -158,17 +158,7 @@ internal class TransactionQuerier : ITransactionQuerier
             ? request.Cursor?.StateVersionBoundary ?? request.FromStateVersion
             : request.FromStateVersion;
 
-        var baseQuery = _dbContext
-            .LedgerTransactions
-            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion));
-
-        var searchQuery = request.SearchCriteria.Status switch
-        {
-            LedgerTransactionStatusFilter.All => baseQuery.Select(lt => lt.StateVersion),
-            LedgerTransactionStatusFilter.Success => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Succeeded).Select(lt => lt.StateVersion),
-            LedgerTransactionStatusFilter.Failure => baseQuery.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Failed).Select(lt => lt.StateVersion),
-            _ => throw new NotSupportedException($"Not supported status: {request.SearchCriteria.Status}"),
-        };
+        IQueryable<long>? searchQuery = null;
 
         var userKindFilterImplicitlyApplied = false;
 
@@ -196,12 +186,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(
-                        _dbContext.LedgerTransactionMarkers,
-                        stateVersion => stateVersion,
-                        ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
-                        (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+                searchQuery = PrepareForNextFilter(searchQuery)
                     .OfType<ResourceBalanceChangeTransactionMarker>()
                     .Where(maltm => maltm.EntityId == entityId)
                     .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
@@ -263,8 +248,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                searchQuery = PrepareForNextFilter(searchQuery)
                     .OfType<AffectedGlobalEntityTransactionMarker>()
                     .Where(agetm => agetm.EntityId == entityId)
                     .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= (lowerStateVersion ?? agetm.StateVersion))
@@ -281,8 +265,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     return TransactionPageWithoutTotal.Empty;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                searchQuery = PrepareForNextFilter(searchQuery)
                     .OfType<EventGlobalEmitterTransactionMarker>()
                     .Where(agetm => agetm.EntityId == entityId)
                     .Where(agetm => agetm.StateVersion <= upperStateVersion && agetm.StateVersion >= (lowerStateVersion ?? agetm.StateVersion))
@@ -326,8 +309,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     eventResourceEntityId = id;
                 }
 
-                searchQuery = searchQuery
-                    .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+                searchQuery = PrepareForNextFilter(searchQuery)
                     .OfType<EventLedgerTransactionMarker>()
                     .Where(eltm => eltm.EventType == eventType && eltm.EntityId == (eventEmitterEntityId ?? eltm.EntityId) && eltm.ResourceEntityId == (eventResourceEntityId ?? eltm.ResourceEntityId))
                     .Where(eltm => eltm.StateVersion <= upperStateVersion && eltm.StateVersion >= (lowerStateVersion ?? eltm.StateVersion))
@@ -352,8 +334,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 _ => throw new UnreachableException($"Didn't expect {request.SearchCriteria.ManifestClassFilter.Class} value"),
             };
 
-            searchQuery = searchQuery
-                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+            searchQuery = PrepareForNextFilter(searchQuery)
                 .OfType<ManifestClassMarker>()
                 .Where(ttm => ttm.ManifestClass == manifestClass)
                 .Where(ttm => (request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType && ttm.IsMostSpecific) || !request.SearchCriteria.ManifestClassFilter.MatchOnlyMostSpecificType)
@@ -392,6 +373,8 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(y => y.StateVersion);
 
+                searchQuery ??= _dbContext.LedgerTransactionMarkers.Select(x => x.StateVersion);
+
                 searchQuery = searchQuery.Where(x => withManifestOwnerCall.All(y => y != x));
             }
         }
@@ -406,8 +389,7 @@ internal class TransactionQuerier : ITransactionQuerier
         }
         else if (request.SearchCriteria.Kind == LedgerTransactionKindFilter.UserOnly)
         {
-            searchQuery = searchQuery
-                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+            searchQuery = PrepareForNextFilter(searchQuery)
                 .OfType<TransactionTypeLedgerTransactionMarker>()
                 .Where(oltm => oltm.TransactionType == LedgerTransactionMarkerTransactionType.User)
                 .Where(oltm => oltm.StateVersion <= upperStateVersion && oltm.StateVersion >= (lowerStateVersion ?? oltm.StateVersion))
@@ -415,22 +397,34 @@ internal class TransactionQuerier : ITransactionQuerier
         }
         else if (request.SearchCriteria.Kind == LedgerTransactionKindFilter.EpochChangeOnly)
         {
-            searchQuery = searchQuery
-                .Join(_dbContext.LedgerTransactionMarkers, sv => sv, ltm => ltm.StateVersion, (sv, ltm) => ltm)
+            searchQuery = PrepareForNextFilter(searchQuery)
                 .OfType<EpochChangeLedgerTransactionMarker>()
                 .Where(ecltm => ecltm.EpochChange)
                 .Where(ecltm => ecltm.StateVersion <= upperStateVersion && ecltm.StateVersion >= (lowerStateVersion ?? ecltm.StateVersion))
                 .Select(ecltm => ecltm.StateVersion);
         }
 
-        if (request.AscendingOrder)
+        var query = searchQuery == null ?
+            _dbContext.LedgerTransactions
+            : searchQuery.Join(
+                _dbContext.LedgerTransactions,
+                stateVersion => stateVersion,
+                ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker);
+
+        searchQuery = request.SearchCriteria.Status switch
         {
-            searchQuery = searchQuery.OrderBy(sv => sv);
-        }
-        else
+            LedgerTransactionStatusFilter.All => query.Select(lt => lt.StateVersion),
+            LedgerTransactionStatusFilter.Success => query.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Succeeded).Select(lt => lt.StateVersion),
+            LedgerTransactionStatusFilter.Failure => query.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Failed).Select(lt => lt.StateVersion),
+            _ => throw new NotSupportedException($"Not supported status: {request.SearchCriteria.Status}"),
+        };
+
+        searchQuery = request.AscendingOrder switch
         {
-            searchQuery = searchQuery.OrderByDescending(sv => sv);
-        }
+            true => searchQuery.OrderBy(sv => sv),
+            _ => searchQuery.OrderByDescending(sv => sv),
+        };
 
         var stateVersions = await searchQuery
             .TagWith(ForceDistinctInterceptor.Apply)
@@ -446,18 +440,27 @@ internal class TransactionQuerier : ITransactionQuerier
 
         return new TransactionPageWithoutTotal(nextCursor, transactions);
 
-        IQueryable<long> ApplyLedgerTransactionMarkerOperationTypeFilter(long entityId, LedgerTransactionMarkerOperationType operationType, IQueryable<long> query)
+        IQueryable<long> ApplyLedgerTransactionMarkerOperationTypeFilter(long entityId, LedgerTransactionMarkerOperationType operationType, IQueryable<long>? query)
         {
-            return query
-                .Join(
-                    _dbContext.LedgerTransactionMarkers,
-                    stateVersion => stateVersion,
-                    ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
-                    (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+            return PrepareForNextFilter(query)
                 .OfType<ManifestAddressLedgerTransactionMarker>()
                 .Where(maltm => maltm.OperationType == operationType && maltm.EntityId == entityId)
                 .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                 .Select(maltm => maltm.StateVersion);
+        }
+
+        IQueryable<LedgerTransactionMarker> PrepareForNextFilter(IQueryable<long>? baseQuery)
+        {
+            if (baseQuery == null)
+            {
+                return _dbContext.LedgerTransactionMarkers;
+            }
+
+            return baseQuery.Join(
+                _dbContext.LedgerTransactionMarkers,
+                stateVersion => stateVersion,
+                ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker);
         }
     }
 
@@ -705,11 +708,12 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
 
                         var detailedEventEmitter = new GatewayModel.PackageFunctionEventEmitter(new GatewayModel.FunctionEmitter(functionEventEmitterIdentifier.BlueprintName));
 
-                        detailedEvents.Add(new GatewayModel.DetailedEventsItem(
-                            detailedIdentifier,
-                            payloadTypeDefinition,
-                            detailedEventEmitter,
-                            payload));
+                        detailedEvents.Add(
+                            new GatewayModel.DetailedEventsItem(
+                                detailedIdentifier,
+                                payloadTypeDefinition,
+                                detailedEventEmitter,
+                                payload));
                     }
                     else if (parsedEmitter is CoreModel.MethodEventEmitterIdentifier methodEventEmitterIdentifier)
                     {
@@ -728,11 +732,12 @@ WHERE (entity_id, schema_hash) IN (SELECT UNNEST({entityIds}), UNNEST({schemaHas
                             outerEmitter: eventDetails.OuterObjectAddress,
                             globalEmitter: eventDetails.GlobalAncestorAddress ?? methodEventEmitterIdentifier.Entity.EntityAddress);
 
-                        detailedEvents.Add(new GatewayModel.DetailedEventsItem(
-                            detailedIdentifier,
-                            payloadTypeDefinition,
-                            detailedEventEmitter,
-                            payload));
+                        detailedEvents.Add(
+                            new GatewayModel.DetailedEventsItem(
+                                detailedIdentifier,
+                                payloadTypeDefinition,
+                                detailedEventEmitter,
+                                payload));
                     }
                     else
                     {
