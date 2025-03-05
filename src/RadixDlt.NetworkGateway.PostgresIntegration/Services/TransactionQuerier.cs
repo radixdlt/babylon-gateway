@@ -373,7 +373,9 @@ internal class TransactionQuerier : ITransactionQuerier
                     .Where(maltm => maltm.StateVersion <= upperStateVersion && maltm.StateVersion >= (lowerStateVersion ?? maltm.StateVersion))
                     .Select(y => y.StateVersion);
 
-                searchQuery ??= _dbContext.LedgerTransactionMarkers.Select(x => x.StateVersion);
+                searchQuery ??= _dbContext.LedgerTransactionMarkers
+                    .Where(ltm => ltm.StateVersion <= upperStateVersion && ltm.StateVersion >= (lowerStateVersion ?? ltm.StateVersion))
+                    .Select(x => x.StateVersion);
 
                 searchQuery = searchQuery.Where(x => withManifestOwnerCall.All(y => y != x));
             }
@@ -404,22 +406,25 @@ internal class TransactionQuerier : ITransactionQuerier
                 .Select(ecltm => ecltm.StateVersion);
         }
 
-        var query = searchQuery == null ?
-            _dbContext.LedgerTransactions.Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
-            : searchQuery.Join(
-                _dbContext.LedgerTransactions,
-                stateVersion => stateVersion,
-                ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
-                (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
-            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion));
-
-        searchQuery = request.SearchCriteria.Status switch
+        if (searchQuery == null || request.SearchCriteria.Status != LedgerTransactionStatusFilter.All)
         {
-            LedgerTransactionStatusFilter.All => query.Select(lt => lt.StateVersion),
-            LedgerTransactionStatusFilter.Success => query.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Succeeded).Select(lt => lt.StateVersion),
-            LedgerTransactionStatusFilter.Failure => query.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Failed).Select(lt => lt.StateVersion),
-            _ => throw new NotSupportedException($"Not supported status: {request.SearchCriteria.Status}"),
-        };
+            var query = searchQuery == null ?
+                _dbContext.LedgerTransactions.Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
+                : searchQuery.Join(
+                        _dbContext.LedgerTransactions,
+                        stateVersion => stateVersion,
+                        ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
+                        (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+                    .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion));
+
+            searchQuery = request.SearchCriteria.Status switch
+            {
+                LedgerTransactionStatusFilter.All => query.Select(lt => lt.StateVersion),
+                LedgerTransactionStatusFilter.Success => query.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Succeeded).Select(lt => lt.StateVersion),
+                LedgerTransactionStatusFilter.Failure => query.Where(x => x.ReceiptStatus == LedgerTransactionStatus.Failed).Select(lt => lt.StateVersion),
+                _ => throw new NotSupportedException($"Not supported status: {request.SearchCriteria.Status}"),
+            };
+        }
 
         searchQuery = request.AscendingOrder switch
         {
