@@ -405,12 +405,13 @@ internal class TransactionQuerier : ITransactionQuerier
         }
 
         var query = searchQuery == null ?
-            _dbContext.LedgerTransactions
+            _dbContext.LedgerTransactions.Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion))
             : searchQuery.Join(
                 _dbContext.LedgerTransactions,
                 stateVersion => stateVersion,
                 ledgerTransactionMarker => ledgerTransactionMarker.StateVersion,
-                (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker);
+                (stateVersion, ledgerTransactionMarker) => ledgerTransactionMarker)
+            .Where(lt => lt.StateVersion <= upperStateVersion && lt.StateVersion >= (lowerStateVersion ?? lt.StateVersion));
 
         searchQuery = request.SearchCriteria.Status switch
         {
