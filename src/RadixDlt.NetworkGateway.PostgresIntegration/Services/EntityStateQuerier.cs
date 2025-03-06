@@ -134,6 +134,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
 
         var entities = await _entityQuerier.GetEntities(addresses, ledgerState, token);
+        var persistedEntities = entities.Where(x => x.Id != default).ToList();
         var componentEntities = entities.OfType<ComponentEntity>().ToList();
         var resourceEntities = entities.OfType<ResourceEntity>().ToList();
         var packageEntities = entities.OfType<GlobalPackageEntity>().ToList();
@@ -161,7 +162,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var packageCodeHistory = await PackageQueries.PackageCodeHistoryMultiLookup(_dbContext, packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
         var packageSchemaHistory = await GetEntitySchemaHistory(packageEntities.Select(e => e.Id).ToArray(), 0, packagePageSize, ledgerState, token);
 
-        var instantiatingPackageDictionary = entities.ToDictionary(
+        var instantiatingPackageDictionary = persistedEntities
+            .ToDictionary(
             x => x.Id,
             x =>
             {
@@ -169,9 +171,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
                 return correlation?.EntityId;
             }
         );
-        var instantiatingPackageIds = instantiatingPackageDictionary.Values.Where(x => x.HasValue).Select(x => x!.Value).ToArray();
+        var instantiatingPackageIds = instantiatingPackageDictionary.Values.Where(x => x.HasValue).Select(x => x!.Value).ToHashSet().ToArray();
 
-        var entityIdsToResolveTwoWayLinks = entities.Select(x => x.Id).Union(instantiatingPackageIds).ToArray();
+        var entityIdsToResolveTwoWayLinks = persistedEntities.Select(x => x.Id).Union(instantiatingPackageIds).ToHashSet().ToArray();
         var resolvedTwoWayLinks = optIns.DappTwoWayLinks
             ? await new StandardMetadataResolver(_dbContext, _dapperWrapper).ResolveTwoWayLinks(entityIdsToResolveTwoWayLinks, true, ledgerState, token)
             : ImmutableDictionary<EntityAddress, ICollection<ResolvedTwoWayLink>>.Empty;
