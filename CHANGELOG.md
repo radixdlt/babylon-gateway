@@ -1,5 +1,11 @@
+## 1.10.1
+Release built: 6.03.2025
+
+### Bug fixes
+- Fixed the 500 status code returned from `/state/entity/details` when querying multiple pre-allocated, non-persisted entities in a single request.
+
 ## 1.10.0
-Release built: _not released yet_
+Release built: 5.03.2025
 
 ### Bug fixes
 - Fixed two bugs in two-way links returned from `/state/entity/details` (If you are affected and your two-way link is not working, the Radix Console tool https://console.radixdlt.com/configure-metadata can help fix it. You may also consider using the blueprint link feature introduced in that release, though it is not yet supported by the tool and must be set manually). 
