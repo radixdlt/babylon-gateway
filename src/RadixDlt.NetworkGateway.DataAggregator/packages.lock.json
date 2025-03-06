@@ -295,7 +295,7 @@
           "Microsoft.Extensions.Hosting": "[8.0.0, )",
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "RadixDlt.CoreApiSdk": "[1.10.0-develop, )"
+          "RadixDlt.CoreApiSdk": "[1.10.1-develop, )"
         }
       },
       "FluentValidation": {

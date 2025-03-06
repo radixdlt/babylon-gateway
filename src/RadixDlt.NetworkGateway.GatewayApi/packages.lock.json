@@ -352,7 +352,7 @@
           "Microsoft.Extensions.Hosting": "[8.0.0, )",
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
-          "RadixDlt.CoreApiSdk": "[1.10.0-develop, )"
+          "RadixDlt.CoreApiSdk": "[1.10.1-develop, )"
         }
       },
       "radixdlt.networkgateway.gatewayapisdk": {
@@ -361,7 +361,7 @@
           "JsonSubTypes": "[2.0.1, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "Polly": "[8.3.0, )",
-          "RadixDlt.NetworkGateway.Abstractions": "[1.10.0-develop, )"
+          "RadixDlt.NetworkGateway.Abstractions": "[1.10.1-develop, )"
         }
       },
       "FluentValidation": {
