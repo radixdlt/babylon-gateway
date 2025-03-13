@@ -72,4 +72,6 @@ public interface ITopOfLedgerProvider
     Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
 
     Task<long> GetLastCommittedStateVersion(CancellationToken token);
+
+    Task<long> GetLastCommittedEpoch(CancellationToken token);
 }

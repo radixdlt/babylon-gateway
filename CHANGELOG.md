@@ -1,6 +1,9 @@
 ## 1.11.0
 Release built: _not released yet_
 
+### Database changes
+- Fixed an invalid `index_in_epoch` value for transactions processed in a batch when they belonged to different epochs.
+
 ## 1.10.1
 Release built: 6.03.2025
 

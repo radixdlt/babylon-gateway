@@ -131,9 +131,9 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
         try
         {
-            var topOfLedgerSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
+            var lastCommittedStateVersion = await _topOfLedgerProvider.GetLastCommittedStateVersion(token);
 
-            TransactionConsistencyValidator.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
+            TransactionConsistencyValidator.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, lastCommittedStateVersion);
 
             var extendLedgerReport = await ProcessTransactions(dbContext, ledgerExtension, token);
 

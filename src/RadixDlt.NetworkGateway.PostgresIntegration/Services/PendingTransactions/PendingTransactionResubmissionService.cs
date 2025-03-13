@@ -302,8 +302,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private async Task<long> GetCurrentEpoch(CancellationToken cancellationToken)
     {
-        var topOfLedger = await _topOfLedgerProvider.GetTopOfLedger(cancellationToken);
-        var signedEpoch = topOfLedger.Epoch;
-        return (signedEpoch >= 0) ? signedEpoch : throw new InvalidStateException($"Epoch was negative: {signedEpoch}");
+        var lastCommitedEpoch = await _topOfLedgerProvider.GetLastCommittedEpoch(cancellationToken);
+        return (lastCommitedEpoch >= 0) ? lastCommitedEpoch : throw new InvalidStateException($"Epoch was negative: {lastCommitedEpoch}");
     }
 }

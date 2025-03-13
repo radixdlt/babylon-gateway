@@ -87,12 +87,12 @@ internal sealed class TopOfLedgerProvider : ITopOfLedgerProvider
 
     public async Task<long> GetLastCommittedStateVersion(CancellationToken token)
     {
-        var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        return (await GetTopOfLedger(token)).StateVersion;
+    }
 
-        return await dbContext.GetTopLedgerTransaction()
-            .AsNoTracking()
-            .Select(t => t.StateVersion)
-            .FirstOrDefaultAsync(token); // Defaults to 0, which is perfect
+    public async Task<long> GetLastCommittedEpoch(CancellationToken token)
+    {
+        return (await GetTopOfLedger(token)).Epoch;
     }
 
     public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)

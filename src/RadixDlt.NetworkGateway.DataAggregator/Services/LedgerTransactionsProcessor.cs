@@ -92,7 +92,6 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
     private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
     private readonly IFetchedTransactionStore _fetchedTransactionStore;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IClock _clock;
 
     private LedgerConfirmationOptions Config { get; set; }
@@ -105,7 +104,6 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         IEnumerable<ILedgerConfirmationServiceObserver> observers,
         IFetchedTransactionStore fetchedTransactionStore,
         ITopOfLedgerProvider topOfLedgerProvider,
-        INetworkConfigurationProvider networkConfigurationProvider,
         IClock clock)
     {
         _logger = logger;
@@ -116,19 +114,17 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         _fetchedTransactionStore = fetchedTransactionStore;
         _topOfLedgerProvider = topOfLedgerProvider;
         _clock = clock;
-        _networkConfigurationProvider = networkConfigurationProvider;
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
     public async Task ProcessTransactions(CancellationToken token)
     {
-        var networkConfiguration = _networkConfigurationProvider.GetNetworkConfiguration();
         var lastCommittedTransactionSummary = await _topOfLedgerProvider.GetTopOfLedger(token);
         await _observers.ForEachAsync(x => x.PreHandleLedgerExtension(_clock.UtcNow));
 
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
 
-        var transactions = ConstructLedgerExtension(lastCommittedTransactionSummary);
+        var transactions = ConstructLedgerExtension(lastCommittedTransactionSummary.StateVersion);
 
         if (transactions.Count == 0)
         {
@@ -146,9 +142,9 @@ public sealed class LedgerTransactionsProcessor : ILedgerTransactionsProcessor
         await DelayBetweenIngestionBatchesIfRequested(commitReport);
     }
 
-    private List<CoreModel.CommittedTransaction> ConstructLedgerExtension(TransactionSummary topOfLedger)
+    private List<CoreModel.CommittedTransaction> ConstructLedgerExtension(long topOfLedgerStateVersion)
     {
-        var startStateVersion = topOfLedger.StateVersion + 1;
+        var startStateVersion = topOfLedgerStateVersion + 1;
         var transactions = _fetchedTransactionStore.GetTransactionBatch(startStateVersion, (int)Config.MaxCommitBatchSize, (int)Config.MinCommitBatchSize);
         return transactions;
     }

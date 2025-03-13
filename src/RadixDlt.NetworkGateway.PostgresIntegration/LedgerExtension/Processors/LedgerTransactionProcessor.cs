@@ -76,6 +76,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -89,11 +90,11 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
         CoreModel.CommittedTransaction RawCommittedTransaction
     )
     {
-        public long? NewEpochIndex { get; set; }
+        public long? RoundUpdateEpochIndex { get; set; }
 
         public long? NewRoundIndex { get; set; }
 
-        public DateTime? RoundTimestampUpdate { get; set; }
+        public DateTime? NewRoundTimestamp { get; set; }
     }
 
     private readonly ProcessorContext _context;
@@ -134,15 +135,13 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
 
         if (committedTransaction.LedgerTransaction is CoreModel.RoundUpdateLedgerTransaction roundUpdateTransaction)
         {
-            var newEpochIndex = _lastProcessedTransactionSummary.Epoch != roundUpdateTransaction.RoundUpdateTransaction.Epoch ? roundUpdateTransaction.RoundUpdateTransaction.Epoch : (long?)null;
-
             _transactionData.Update(
                 stateVersion,
                 existing =>
                 {
-                    existing.NewEpochIndex = newEpochIndex;
+                    existing.RoundUpdateEpochIndex = roundUpdateTransaction.RoundUpdateTransaction.Epoch;
                     existing.NewRoundIndex = roundUpdateTransaction.RoundUpdateTransaction.RoundInEpoch;
-                    existing.RoundTimestampUpdate = DateTimeOffset.FromUnixTimeMilliseconds(roundUpdateTransaction.RoundUpdateTransaction.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
+                    existing.NewRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(roundUpdateTransaction.RoundUpdateTransaction.ProposerTimestamp.UnixTimestampMs).UtcDateTime;
                 });
         }
     }
@@ -155,7 +154,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
         {
             _transactionData.Update(
                 stateVersion,
-                existing => { existing.RoundTimestampUpdate = DateTimeOffset.FromUnixTimeMilliseconds(currentTime.Value.ProposerTimestamp.UnixTimestampMs).UtcDateTime; });
+                existing => { existing.NewRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(currentTime.Value.ProposerTimestamp.UnixTimestampMs).UtcDateTime; });
         }
     }
 
@@ -171,17 +170,18 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
             var stateVersion = data.StateVersion;
             var committedTransaction = data.RawCommittedTransaction;
 
-            var roundTimestamp = data.RoundTimestampUpdate ?? _lastProcessedTransactionSummary.RoundTimestamp;
-
+            var roundInEpoch = data.NewRoundIndex ?? _lastProcessedTransactionSummary.RoundInEpoch;
+            var roundTimestamp = data.NewRoundTimestamp ?? _lastProcessedTransactionSummary.RoundTimestamp;
             var normalizedRoundTimestamp =
                 roundTimestamp < _lastProcessedTransactionSummary.NormalizedRoundTimestamp ? _lastProcessedTransactionSummary.NormalizedRoundTimestamp
                 : roundTimestamp > data.CreatedAt ? data.CreatedAt
                 : roundTimestamp;
 
-            var epoch = data.NewEpochIndex ?? _lastProcessedTransactionSummary.Epoch;
-            var roundInEpoch = data.NewRoundIndex ?? _lastProcessedTransactionSummary.RoundInEpoch;
-            var indexInEpoch = data.NewEpochIndex.HasValue ? 0 : _lastProcessedTransactionSummary.IndexInEpoch + 1;
-            var indexInRound = data.NewEpochIndex.HasValue ? 0 : _lastProcessedTransactionSummary.IndexInRound + 1;
+            var epoch = data.RoundUpdateEpochIndex ?? _lastProcessedTransactionSummary.Epoch;
+            bool isNewEpoch = epoch != _lastProcessedTransactionSummary.Epoch;
+
+            var indexInEpoch = isNewEpoch ? 0 : _lastProcessedTransactionSummary.IndexInEpoch + 1;
+            var indexInRound = data.NewRoundIndex.HasValue ? 0 : _lastProcessedTransactionSummary.IndexInRound + 1;
 
             LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction switch
             {
@@ -277,7 +277,7 @@ internal class LedgerTransactionProcessor : IProcessorBase, ITransactionProcesso
             }
 
             var isUserTransaction = committedTransaction.LedgerTransaction is CoreModel.UserLedgerTransaction or CoreModel.UserLedgerTransactionV2;
-            var isUserTransactionOrEpochChange = isUserTransaction || data.NewEpochIndex.HasValue;
+            var isUserTransactionOrEpochChange = isUserTransaction || isNewEpoch;
 
             if (_context.StorageOptions.StoreReceiptStateUpdates == LedgerTransactionStorageOption.StoreForAllTransactions ||
                 (_context.StorageOptions.StoreReceiptStateUpdates == LedgerTransactionStorageOption.StoreOnlyForUserTransactions && isUserTransaction) ||
