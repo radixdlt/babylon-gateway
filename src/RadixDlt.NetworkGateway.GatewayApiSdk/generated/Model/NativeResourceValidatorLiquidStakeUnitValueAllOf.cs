@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NativeResourceValidatorLiquidStakeUnitValueAllOf
     /// </summary>
     [DataContract(Name = "NativeResourceValidatorLiquidStakeUnitValue_allOf")]
-    public partial class NativeResourceValidatorLiquidStakeUnitValueAllOf : IEquatable<NativeResourceValidatorLiquidStakeUnitValueAllOf>
+    public partial class NativeResourceValidatorLiquidStakeUnitValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeResourceValidatorLiquidStakeUnitValueAllOf" /> class.

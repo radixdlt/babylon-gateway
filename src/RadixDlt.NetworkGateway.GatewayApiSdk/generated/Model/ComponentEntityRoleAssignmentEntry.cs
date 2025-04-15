@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ComponentEntityRoleAssignmentEntry
     /// </summary>
     [DataContract(Name = "ComponentEntityRoleAssignmentEntry")]
-    public partial class ComponentEntityRoleAssignmentEntry : IEquatable<ComponentEntityRoleAssignmentEntry>
+    public partial class ComponentEntityRoleAssignmentEntry
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntry" /> class.

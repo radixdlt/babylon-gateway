@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountDepositPreValidationNonFungibleBadgeAllOf
     /// </summary>
     [DataContract(Name = "AccountDepositPreValidationNonFungibleBadge_allOf")]
-    public partial class AccountDepositPreValidationNonFungibleBadgeAllOf : IEquatable<AccountDepositPreValidationNonFungibleBadgeAllOf>
+    public partial class AccountDepositPreValidationNonFungibleBadgeAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositPreValidationNonFungibleBadgeAllOf" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// FungibleResourcesCollectionItemVaultAggregatedVaultItem
     /// </summary>
     [DataContract(Name = "FungibleResourcesCollectionItemVaultAggregatedVaultItem")]
-    public partial class FungibleResourcesCollectionItemVaultAggregatedVaultItem : IEquatable<FungibleResourcesCollectionItemVaultAggregatedVaultItem>
+    public partial class FungibleResourcesCollectionItemVaultAggregatedVaultItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItemVaultAggregatedVaultItem" /> class.

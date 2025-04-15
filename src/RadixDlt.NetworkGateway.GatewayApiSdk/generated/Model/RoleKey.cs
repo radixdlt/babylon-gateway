@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// RoleKey
     /// </summary>
     [DataContract(Name = "RoleKey")]
-    public partial class RoleKey : IEquatable<RoleKey>
+    public partial class RoleKey
     {
 
         /// <summary>

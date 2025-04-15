@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "FungibleResource")]
     [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "NonFungibleResource")]
-    public partial class ResourceHoldersCollectionFungibleResourceItem : ResourceHoldersCollectionItem, IEquatable<ResourceHoldersCollectionFungibleResourceItem>
+    public partial class ResourceHoldersCollectionFungibleResourceItem : ResourceHoldersCollectionItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceHoldersCollectionFungibleResourceItem" /> class.

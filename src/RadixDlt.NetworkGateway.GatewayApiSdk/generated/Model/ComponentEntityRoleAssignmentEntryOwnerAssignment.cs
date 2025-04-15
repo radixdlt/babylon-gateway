@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "resolution")]
     [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryExplicitAssignment), "Explicit")]
     [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryOwnerAssignment), "Owner")]
-    public partial class ComponentEntityRoleAssignmentEntryOwnerAssignment : ComponentEntityRoleAssignmentEntryAssignment, IEquatable<ComponentEntityRoleAssignmentEntryOwnerAssignment>
+    public partial class ComponentEntityRoleAssignmentEntryOwnerAssignment : ComponentEntityRoleAssignmentEntryAssignment
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentEntityRoleAssignmentEntryOwnerAssignment" /> class.

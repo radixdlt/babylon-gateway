@@ -96,7 +96,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "CompiledPreviewTransaction")]
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "Compiled")]
-    public partial class CompiledPreviewTransaction : PreviewTransaction, IEquatable<CompiledPreviewTransaction>
+    public partial class CompiledPreviewTransaction : PreviewTransaction
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CompiledPreviewTransaction" /> class.

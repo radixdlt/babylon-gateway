@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ImplicitRequirementsLookupResponse
     /// </summary>
     [DataContract(Name = "ImplicitRequirementsLookupResponse")]
-    public partial class ImplicitRequirementsLookupResponse : IEquatable<ImplicitRequirementsLookupResponse>
+    public partial class ImplicitRequirementsLookupResponse
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ImplicitRequirementsLookupResponse" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Provide either &#x60;key_hex&#x60; or &#x60;key_json&#x60;. If both are provided, &#x60;key_hex&#x60; is used and &#x60;key_json&#x60; is ignored.
     /// </summary>
     [DataContract(Name = "StateKeyValueStoreDataRequestKeyItem")]
-    public partial class StateKeyValueStoreDataRequestKeyItem : IEquatable<StateKeyValueStoreDataRequestKeyItem>
+    public partial class StateKeyValueStoreDataRequestKeyItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateKeyValueStoreDataRequestKeyItem" /> class.

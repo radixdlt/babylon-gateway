@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ResolvedSecp256k1PublicKeyImplicitRequirementAllOf
     /// </summary>
     [DataContract(Name = "ResolvedSecp256k1PublicKeyImplicitRequirement_allOf")]
-    public partial class ResolvedSecp256k1PublicKeyImplicitRequirementAllOf : IEquatable<ResolvedSecp256k1PublicKeyImplicitRequirementAllOf>
+    public partial class ResolvedSecp256k1PublicKeyImplicitRequirementAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedSecp256k1PublicKeyImplicitRequirementAllOf" /> class.

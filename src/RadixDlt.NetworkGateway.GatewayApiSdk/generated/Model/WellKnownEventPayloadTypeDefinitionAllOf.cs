@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// WellKnownEventPayloadTypeDefinitionAllOf
     /// </summary>
     [DataContract(Name = "WellKnownEventPayloadTypeDefinition_allOf")]
-    public partial class WellKnownEventPayloadTypeDefinitionAllOf : IEquatable<WellKnownEventPayloadTypeDefinitionAllOf>
+    public partial class WellKnownEventPayloadTypeDefinitionAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WellKnownEventPayloadTypeDefinitionAllOf" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NativeResourceRedemptionValueItem
     /// </summary>
     [DataContract(Name = "NativeResourceRedemptionValueItem")]
-    public partial class NativeResourceRedemptionValueItem : IEquatable<NativeResourceRedemptionValueItem>
+    public partial class NativeResourceRedemptionValueItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeResourceRedemptionValueItem" /> class.

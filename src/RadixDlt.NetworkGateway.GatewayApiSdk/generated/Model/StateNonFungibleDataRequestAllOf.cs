@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateNonFungibleDataRequestAllOf
     /// </summary>
     [DataContract(Name = "StateNonFungibleDataRequest_allOf")]
-    public partial class StateNonFungibleDataRequestAllOf : IEquatable<StateNonFungibleDataRequestAllOf>
+    public partial class StateNonFungibleDataRequestAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateNonFungibleDataRequestAllOf" /> class.

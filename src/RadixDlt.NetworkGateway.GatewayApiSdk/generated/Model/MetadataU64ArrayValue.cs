@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(MetadataU8ArrayValue), "U8Array")]
     [JsonSubtypes.KnownSubType(typeof(MetadataUrlValue), "Url")]
     [JsonSubtypes.KnownSubType(typeof(MetadataUrlArrayValue), "UrlArray")]
-    public partial class MetadataU64ArrayValue : MetadataTypedValue, IEquatable<MetadataU64ArrayValue>
+    public partial class MetadataU64ArrayValue : MetadataTypedValue
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataU64ArrayValue" /> class.

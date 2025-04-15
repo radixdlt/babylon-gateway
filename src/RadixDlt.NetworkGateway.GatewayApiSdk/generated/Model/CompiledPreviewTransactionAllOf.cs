@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// CompiledPreviewTransactionAllOf
     /// </summary>
     [DataContract(Name = "CompiledPreviewTransaction_allOf")]
-    public partial class CompiledPreviewTransactionAllOf : IEquatable<CompiledPreviewTransactionAllOf>
+    public partial class CompiledPreviewTransactionAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CompiledPreviewTransactionAllOf" /> class.

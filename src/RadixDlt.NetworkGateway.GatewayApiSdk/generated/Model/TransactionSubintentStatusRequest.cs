@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionSubintentStatusRequest
     /// </summary>
     [DataContract(Name = "TransactionSubintentStatusRequest")]
-    public partial class TransactionSubintentStatusRequest : IEquatable<TransactionSubintentStatusRequest>
+    public partial class TransactionSubintentStatusRequest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubintentStatusRequest" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateAccountLockersTouchedAtRequest
     /// </summary>
     [DataContract(Name = "StateAccountLockersTouchedAtRequest")]
-    public partial class StateAccountLockersTouchedAtRequest : IEquatable<StateAccountLockersTouchedAtRequest>
+    public partial class StateAccountLockersTouchedAtRequest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateAccountLockersTouchedAtRequest" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountDepositPreValidationResponseAllOf
     /// </summary>
     [DataContract(Name = "AccountDepositPreValidationResponse_allOf")]
-    public partial class AccountDepositPreValidationResponseAllOf : IEquatable<AccountDepositPreValidationResponseAllOf>
+    public partial class AccountDepositPreValidationResponseAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositPreValidationResponseAllOf" /> class.

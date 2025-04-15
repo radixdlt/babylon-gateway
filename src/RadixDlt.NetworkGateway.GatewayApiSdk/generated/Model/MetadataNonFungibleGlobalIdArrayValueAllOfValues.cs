@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// MetadataNonFungibleGlobalIdArrayValueAllOfValues
     /// </summary>
     [DataContract(Name = "MetadataNonFungibleGlobalIdArrayValue_allOf_values")]
-    public partial class MetadataNonFungibleGlobalIdArrayValueAllOfValues : IEquatable<MetadataNonFungibleGlobalIdArrayValueAllOfValues>
+    public partial class MetadataNonFungibleGlobalIdArrayValueAllOfValues
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdArrayValueAllOfValues" /> class.

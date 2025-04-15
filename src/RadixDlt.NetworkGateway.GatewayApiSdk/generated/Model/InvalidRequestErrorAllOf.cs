@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// InvalidRequestErrorAllOf
     /// </summary>
     [DataContract(Name = "InvalidRequestError_allOf")]
-    public partial class InvalidRequestErrorAllOf : IEquatable<InvalidRequestErrorAllOf>
+    public partial class InvalidRequestErrorAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidRequestErrorAllOf" /> class.

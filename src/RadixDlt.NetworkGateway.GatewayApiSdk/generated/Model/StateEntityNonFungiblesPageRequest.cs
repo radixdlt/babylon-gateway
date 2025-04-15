@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateEntityNonFungiblesPageRequest
     /// </summary>
     [DataContract(Name = "StateEntityNonFungiblesPageRequest")]
-    public partial class StateEntityNonFungiblesPageRequest : IEquatable<StateEntityNonFungiblesPageRequest>
+    public partial class StateEntityNonFungiblesPageRequest
     {
 
         /// <summary>

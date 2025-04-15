@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionNotFoundErrorAllOf
     /// </summary>
     [DataContract(Name = "TransactionNotFoundError_allOf")]
-    public partial class TransactionNotFoundErrorAllOf : IEquatable<TransactionNotFoundErrorAllOf>
+    public partial class TransactionNotFoundErrorAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionNotFoundErrorAllOf" /> class.

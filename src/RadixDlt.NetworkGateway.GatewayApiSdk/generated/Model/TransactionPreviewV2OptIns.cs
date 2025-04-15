@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// A set of flags to configure the response of the transaction preview v2 endpoint.
     /// </summary>
     [DataContract(Name = "TransactionPreviewV2OptIns")]
-    public partial class TransactionPreviewV2OptIns : IEquatable<TransactionPreviewV2OptIns>
+    public partial class TransactionPreviewV2OptIns
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewV2OptIns" /> class.

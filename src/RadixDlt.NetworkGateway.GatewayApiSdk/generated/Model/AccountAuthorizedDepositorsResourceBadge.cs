@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "badge_type")]
     [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsNonFungibleBadge), "NonFungibleBadge")]
     [JsonSubtypes.KnownSubType(typeof(AccountAuthorizedDepositorsResourceBadge), "ResourceBadge")]
-    public partial class AccountAuthorizedDepositorsResourceBadge : AccountAuthorizedDepositorsResponseItem, IEquatable<AccountAuthorizedDepositorsResourceBadge>
+    public partial class AccountAuthorizedDepositorsResourceBadge : AccountAuthorizedDepositorsResponseItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResourceBadge" /> class.

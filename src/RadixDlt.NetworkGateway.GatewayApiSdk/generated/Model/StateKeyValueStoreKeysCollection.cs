@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Key value store items collection.
     /// </summary>
     [DataContract(Name = "StateKeyValueStoreKeysCollection")]
-    public partial class StateKeyValueStoreKeysCollection : IEquatable<StateKeyValueStoreKeysCollection>
+    public partial class StateKeyValueStoreKeysCollection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateKeyValueStoreKeysCollection" /> class.

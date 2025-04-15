@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountLockerVaultCollectionItemFungibleAllOf
     /// </summary>
     [DataContract(Name = "AccountLockerVaultCollectionItemFungible_allOf")]
-    public partial class AccountLockerVaultCollectionItemFungibleAllOf : IEquatable<AccountLockerVaultCollectionItemFungibleAllOf>
+    public partial class AccountLockerVaultCollectionItemFungibleAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemFungibleAllOf" /> class.

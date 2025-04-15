@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntityNotFoundErrorAllOf
     /// </summary>
     [DataContract(Name = "EntityNotFoundError_allOf")]
-    public partial class EntityNotFoundErrorAllOf : IEquatable<EntityNotFoundErrorAllOf>
+    public partial class EntityNotFoundErrorAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityNotFoundErrorAllOf" /> class.

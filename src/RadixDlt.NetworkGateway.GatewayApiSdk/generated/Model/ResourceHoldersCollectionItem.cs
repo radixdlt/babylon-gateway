@@ -99,7 +99,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "NonFungibleResource")]
     [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionFungibleResourceItem), "ResourceHoldersCollectionFungibleResourceItem")]
     [JsonSubtypes.KnownSubType(typeof(ResourceHoldersCollectionNonFungibleResourceItem), "ResourceHoldersCollectionNonFungibleResourceItem")]
-    public partial class ResourceHoldersCollectionItem : IEquatable<ResourceHoldersCollectionItem>
+    public partial class ResourceHoldersCollectionItem
     {
 
         /// <summary>

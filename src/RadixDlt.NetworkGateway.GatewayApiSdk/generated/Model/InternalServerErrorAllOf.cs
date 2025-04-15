@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// InternalServerErrorAllOf
     /// </summary>
     [DataContract(Name = "InternalServerError_allOf")]
-    public partial class InternalServerErrorAllOf : IEquatable<InternalServerErrorAllOf>
+    public partial class InternalServerErrorAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InternalServerErrorAllOf" /> class.

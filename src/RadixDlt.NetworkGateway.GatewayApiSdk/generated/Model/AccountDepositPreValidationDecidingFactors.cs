@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Deciding factors used to calculate response.
     /// </summary>
     [DataContract(Name = "AccountDepositPreValidationDecidingFactors")]
-    public partial class AccountDepositPreValidationDecidingFactors : IEquatable<AccountDepositPreValidationDecidingFactors>
+    public partial class AccountDepositPreValidationDecidingFactors
     {
 
         /// <summary>

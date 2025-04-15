@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ResolvedEd25519PublicKeyImplicitRequirementAllOf
     /// </summary>
     [DataContract(Name = "ResolvedEd25519PublicKeyImplicitRequirement_allOf")]
-    public partial class ResolvedEd25519PublicKeyImplicitRequirementAllOf : IEquatable<ResolvedEd25519PublicKeyImplicitRequirementAllOf>
+    public partial class ResolvedEd25519PublicKeyImplicitRequirementAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedEd25519PublicKeyImplicitRequirementAllOf" /> class.

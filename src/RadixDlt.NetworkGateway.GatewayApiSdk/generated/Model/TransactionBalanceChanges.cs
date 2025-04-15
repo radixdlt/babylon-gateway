@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionBalanceChanges
     /// </summary>
     [DataContract(Name = "TransactionBalanceChanges")]
-    public partial class TransactionBalanceChanges : IEquatable<TransactionBalanceChanges>
+    public partial class TransactionBalanceChanges
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionBalanceChanges" /> class.

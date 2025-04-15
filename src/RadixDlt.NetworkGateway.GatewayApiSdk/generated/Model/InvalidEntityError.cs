@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
     [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
     [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class InvalidEntityError : GatewayError, IEquatable<InvalidEntityError>
+    public partial class InvalidEntityError : GatewayError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidEntityError" /> class.

@@ -99,7 +99,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryOwnerAssignment), "ComponentEntityRoleAssignmentEntryOwnerAssignment")]
     [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryExplicitAssignment), "Explicit")]
     [JsonSubtypes.KnownSubType(typeof(ComponentEntityRoleAssignmentEntryOwnerAssignment), "Owner")]
-    public partial class ComponentEntityRoleAssignmentEntryAssignment : IEquatable<ComponentEntityRoleAssignmentEntryAssignment>
+    public partial class ComponentEntityRoleAssignmentEntryAssignment
     {
 
         /// <summary>

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Details of the blueprint function that emitted the event.
     /// </summary>
     [DataContract(Name = "FunctionEmitter")]
-    public partial class FunctionEmitter : IEquatable<FunctionEmitter>
+    public partial class FunctionEmitter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FunctionEmitter" /> class.

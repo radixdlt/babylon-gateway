@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ValidatorsUptimeRequestAllOf
     /// </summary>
     [DataContract(Name = "ValidatorsUptimeRequest_allOf")]
-    public partial class ValidatorsUptimeRequestAllOf : IEquatable<ValidatorsUptimeRequestAllOf>
+    public partial class ValidatorsUptimeRequestAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorsUptimeRequestAllOf" /> class.

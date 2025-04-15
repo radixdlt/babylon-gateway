@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountResourcePreferencesResponseItem
     /// </summary>
     [DataContract(Name = "AccountResourcePreferencesResponseItem")]
-    public partial class AccountResourcePreferencesResponseItem : IEquatable<AccountResourcePreferencesResponseItem>
+    public partial class AccountResourcePreferencesResponseItem
     {
 
         /// <summary>

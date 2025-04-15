@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// The ledger state against which the response was generated. Can be used to detect if the Network Gateway is returning up-to-date information. 
     /// </summary>
     [DataContract(Name = "LedgerState")]
-    public partial class LedgerState : IEquatable<LedgerState>
+    public partial class LedgerState
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LedgerState" /> class.

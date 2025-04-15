@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
     /// </summary>
     [DataContract(Name = "StateEntityNonFungiblesPageRequestOptIns")]
-    public partial class StateEntityNonFungiblesPageRequestOptIns : IEquatable<StateEntityNonFungiblesPageRequestOptIns>
+    public partial class StateEntityNonFungiblesPageRequestOptIns
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityNonFungiblesPageRequestOptIns" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NonFungibleGlobalId
     /// </summary>
     [DataContract(Name = "NonFungibleGlobalId")]
-    public partial class NonFungibleGlobalId : IEquatable<NonFungibleGlobalId>
+    public partial class NonFungibleGlobalId
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleGlobalId" /> class.

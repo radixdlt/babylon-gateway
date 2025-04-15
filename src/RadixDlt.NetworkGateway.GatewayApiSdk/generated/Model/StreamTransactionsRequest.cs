@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StreamTransactionsRequest
     /// </summary>
     [DataContract(Name = "StreamTransactionsRequest")]
-    public partial class StreamTransactionsRequest : IEquatable<StreamTransactionsRequest>
+    public partial class StreamTransactionsRequest
     {
         /// <summary>
         /// Limit returned transactions by their kind. Defaults to &#x60;user&#x60;.

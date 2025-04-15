@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntitiesByRoleRequirementPageResponse
     /// </summary>
     [DataContract(Name = "EntitiesByRoleRequirementPageResponse")]
-    public partial class EntitiesByRoleRequirementPageResponse : IEquatable<EntitiesByRoleRequirementPageResponse>
+    public partial class EntitiesByRoleRequirementPageResponse
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementPageResponse" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ScryptoSborValue
     /// </summary>
     [DataContract(Name = "ScryptoSborValue")]
-    public partial class ScryptoSborValue : IEquatable<ScryptoSborValue>
+    public partial class ScryptoSborValue
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ScryptoSborValue" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StreamTransactionsResponseAllOf
     /// </summary>
     [DataContract(Name = "StreamTransactionsResponse_allOf")]
-    public partial class StreamTransactionsResponseAllOf : IEquatable<StreamTransactionsResponseAllOf>
+    public partial class StreamTransactionsResponseAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamTransactionsResponseAllOf" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// PublicKeyHashEcdsaSecp256k1AllOf
     /// </summary>
     [DataContract(Name = "PublicKeyHashEcdsaSecp256k1_allOf")]
-    public partial class PublicKeyHashEcdsaSecp256k1AllOf : IEquatable<PublicKeyHashEcdsaSecp256k1AllOf>
+    public partial class PublicKeyHashEcdsaSecp256k1AllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicKeyHashEcdsaSecp256k1AllOf" /> class.

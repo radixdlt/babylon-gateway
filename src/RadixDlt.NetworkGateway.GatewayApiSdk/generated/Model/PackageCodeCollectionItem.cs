@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// PackageCodeCollectionItem
     /// </summary>
     [DataContract(Name = "PackageCodeCollectionItem")]
-    public partial class PackageCodeCollectionItem : IEquatable<PackageCodeCollectionItem>
+    public partial class PackageCodeCollectionItem
     {
 
         /// <summary>

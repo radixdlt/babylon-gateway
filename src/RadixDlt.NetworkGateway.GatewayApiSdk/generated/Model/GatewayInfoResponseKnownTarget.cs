@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// GatewayInfoResponseKnownTarget
     /// </summary>
     [DataContract(Name = "GatewayInfoResponseKnownTarget")]
-    public partial class GatewayInfoResponseKnownTarget : IEquatable<GatewayInfoResponseKnownTarget>
+    public partial class GatewayInfoResponseKnownTarget
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GatewayInfoResponseKnownTarget" /> class.

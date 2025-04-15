@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ValidatorCollectionItemEffectiveFeeFactor
     /// </summary>
     [DataContract(Name = "ValidatorCollectionItem_effective_fee_factor")]
-    public partial class ValidatorCollectionItemEffectiveFeeFactor : IEquatable<ValidatorCollectionItemEffectiveFeeFactor>
+    public partial class ValidatorCollectionItemEffectiveFeeFactor
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorCollectionItemEffectiveFeeFactor" /> class.

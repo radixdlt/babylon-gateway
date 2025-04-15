@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StatePackageCodePageRequest
     /// </summary>
     [DataContract(Name = "StatePackageCodePageRequest")]
-    public partial class StatePackageCodePageRequest : IEquatable<StatePackageCodePageRequest>
+    public partial class StatePackageCodePageRequest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StatePackageCodePageRequest" /> class.

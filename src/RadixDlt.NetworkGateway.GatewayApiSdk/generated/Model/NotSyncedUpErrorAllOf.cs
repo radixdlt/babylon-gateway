@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NotSyncedUpErrorAllOf
     /// </summary>
     [DataContract(Name = "NotSyncedUpError_allOf")]
-    public partial class NotSyncedUpErrorAllOf : IEquatable<NotSyncedUpErrorAllOf>
+    public partial class NotSyncedUpErrorAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NotSyncedUpErrorAllOf" /> class.

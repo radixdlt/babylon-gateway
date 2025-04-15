@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NativeResourceTwoResourcePoolUnitValueAllOf
     /// </summary>
     [DataContract(Name = "NativeResourceTwoResourcePoolUnitValue_allOf")]
-    public partial class NativeResourceTwoResourcePoolUnitValueAllOf : IEquatable<NativeResourceTwoResourcePoolUnitValueAllOf>
+    public partial class NativeResourceTwoResourcePoolUnitValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeResourceTwoResourcePoolUnitValueAllOf" /> class.

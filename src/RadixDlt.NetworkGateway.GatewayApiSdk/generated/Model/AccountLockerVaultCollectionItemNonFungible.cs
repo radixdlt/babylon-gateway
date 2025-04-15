@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(AccountLockerVaultCollectionItemFungible), "Fungible")]
     [JsonSubtypes.KnownSubType(typeof(AccountLockerVaultCollectionItemNonFungible), "NonFungible")]
-    public partial class AccountLockerVaultCollectionItemNonFungible : AccountLockerVaultCollectionItem, IEquatable<AccountLockerVaultCollectionItemNonFungible>
+    public partial class AccountLockerVaultCollectionItemNonFungible : AccountLockerVaultCollectionItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionItemNonFungible" /> class.

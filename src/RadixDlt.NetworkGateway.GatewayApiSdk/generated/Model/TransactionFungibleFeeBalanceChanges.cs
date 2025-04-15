@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionFungibleFeeBalanceChanges
     /// </summary>
     [DataContract(Name = "TransactionFungibleFeeBalanceChanges")]
-    public partial class TransactionFungibleFeeBalanceChanges : IEquatable<TransactionFungibleFeeBalanceChanges>
+    public partial class TransactionFungibleFeeBalanceChanges
     {
 
         /// <summary>

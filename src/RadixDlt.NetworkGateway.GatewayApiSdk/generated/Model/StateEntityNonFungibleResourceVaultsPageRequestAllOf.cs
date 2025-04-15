@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateEntityNonFungibleResourceVaultsPageRequestAllOf
     /// </summary>
     [DataContract(Name = "StateEntityNonFungibleResourceVaultsPageRequest_allOf")]
-    public partial class StateEntityNonFungibleResourceVaultsPageRequestAllOf : IEquatable<StateEntityNonFungibleResourceVaultsPageRequestAllOf>
+    public partial class StateEntityNonFungibleResourceVaultsPageRequestAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityNonFungibleResourceVaultsPageRequestAllOf" /> class.

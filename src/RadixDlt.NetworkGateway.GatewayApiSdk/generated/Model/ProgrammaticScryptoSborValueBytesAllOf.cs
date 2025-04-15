@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ProgrammaticScryptoSborValueBytesAllOf
     /// </summary>
     [DataContract(Name = "ProgrammaticScryptoSborValueBytes_allOf")]
-    public partial class ProgrammaticScryptoSborValueBytesAllOf : IEquatable<ProgrammaticScryptoSborValueBytesAllOf>
+    public partial class ProgrammaticScryptoSborValueBytesAllOf
     {
 
         /// <summary>

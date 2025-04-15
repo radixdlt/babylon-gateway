@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ResultSetCursorMixin
     /// </summary>
     [DataContract(Name = "ResultSetCursorMixin")]
-    public partial class ResultSetCursorMixin : IEquatable<ResultSetCursorMixin>
+    public partial class ResultSetCursorMixin
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResultSetCursorMixin" /> class.

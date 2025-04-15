@@ -99,7 +99,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "FungibleResourcesCollectionItemVaultAggregated")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemGloballyAggregated), "Global")]
     [JsonSubtypes.KnownSubType(typeof(FungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class FungibleResourcesCollectionItem : IEquatable<FungibleResourcesCollectionItem>
+    public partial class FungibleResourcesCollectionItem
     {
 
         /// <summary>

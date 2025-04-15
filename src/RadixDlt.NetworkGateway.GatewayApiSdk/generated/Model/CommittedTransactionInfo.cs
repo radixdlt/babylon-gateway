@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// CommittedTransactionInfo
     /// </summary>
     [DataContract(Name = "CommittedTransactionInfo")]
-    public partial class CommittedTransactionInfo : IEquatable<CommittedTransactionInfo>
+    public partial class CommittedTransactionInfo
     {
 
         /// <summary>

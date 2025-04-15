@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ComponentRoyaltyConfig
     /// </summary>
     [DataContract(Name = "ComponentRoyaltyConfig")]
-    public partial class ComponentRoyaltyConfig : IEquatable<ComponentRoyaltyConfig>
+    public partial class ComponentRoyaltyConfig
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentRoyaltyConfig" /> class.

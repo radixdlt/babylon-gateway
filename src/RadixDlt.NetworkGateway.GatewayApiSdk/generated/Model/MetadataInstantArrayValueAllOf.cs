@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// See documentation of &#x60;MetadataInstantValue&#x60; for detailed description of &#x60;values&#x60; vs &#x60;values_unix_timestamp_seconds&#x60;. 
     /// </summary>
     [DataContract(Name = "MetadataInstantArrayValue_allOf")]
-    public partial class MetadataInstantArrayValueAllOf : IEquatable<MetadataInstantArrayValueAllOf>
+    public partial class MetadataInstantArrayValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataInstantArrayValueAllOf" /> class.

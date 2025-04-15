@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TwoWayLinkedEntitiesCollectionItem
     /// </summary>
     [DataContract(Name = "TwoWayLinkedEntitiesCollectionItem")]
-    public partial class TwoWayLinkedEntitiesCollectionItem : IEquatable<TwoWayLinkedEntitiesCollectionItem>
+    public partial class TwoWayLinkedEntitiesCollectionItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TwoWayLinkedEntitiesCollectionItem" /> class.

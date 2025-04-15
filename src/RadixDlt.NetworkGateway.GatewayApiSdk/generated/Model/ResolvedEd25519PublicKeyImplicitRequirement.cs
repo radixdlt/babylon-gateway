@@ -102,7 +102,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ResolvedProtocolExecutionImplicitRequirement), "ProtocolExecution")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedSecp256k1PublicKeyImplicitRequirement), "Secp256k1PublicKey")]
     [JsonSubtypes.KnownSubType(typeof(ResolvedValidatorExecutionImplicitRequirement), "ValidatorExecution")]
-    public partial class ResolvedEd25519PublicKeyImplicitRequirement : ResolvedImplicitRequirement, IEquatable<ResolvedEd25519PublicKeyImplicitRequirement>
+    public partial class ResolvedEd25519PublicKeyImplicitRequirement : ResolvedImplicitRequirement
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedEd25519PublicKeyImplicitRequirement" /> class.

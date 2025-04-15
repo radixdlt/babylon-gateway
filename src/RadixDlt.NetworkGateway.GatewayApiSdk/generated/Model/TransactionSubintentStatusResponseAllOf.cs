@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionSubintentStatusResponseAllOf
     /// </summary>
     [DataContract(Name = "TransactionSubintentStatusResponse_allOf")]
-    public partial class TransactionSubintentStatusResponseAllOf : IEquatable<TransactionSubintentStatusResponseAllOf>
+    public partial class TransactionSubintentStatusResponseAllOf
     {
 
         /// <summary>

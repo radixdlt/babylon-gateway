@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateValidatorsListRequestAllOf
     /// </summary>
     [DataContract(Name = "StateValidatorsListRequest_allOf")]
-    public partial class StateValidatorsListRequestAllOf : IEquatable<StateValidatorsListRequestAllOf>
+    public partial class StateValidatorsListRequestAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateValidatorsListRequestAllOf" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ResourceHoldersCollectionNonFungibleResourceItemAllOf
     /// </summary>
     [DataContract(Name = "ResourceHoldersCollectionNonFungibleResourceItem_allOf")]
-    public partial class ResourceHoldersCollectionNonFungibleResourceItemAllOf : IEquatable<ResourceHoldersCollectionNonFungibleResourceItemAllOf>
+    public partial class ResourceHoldersCollectionNonFungibleResourceItemAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceHoldersCollectionNonFungibleResourceItemAllOf" /> class.

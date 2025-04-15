@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EventsItem
     /// </summary>
     [DataContract(Name = "EventsItem")]
-    public partial class EventsItem : IEquatable<EventsItem>
+    public partial class EventsItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsItem" /> class.

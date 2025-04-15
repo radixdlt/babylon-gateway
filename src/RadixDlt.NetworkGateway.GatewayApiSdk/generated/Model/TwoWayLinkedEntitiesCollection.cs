@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// A collection of directly two-way linked (resolved &amp; verified) entities linked to the entity defining this collection.
     /// </summary>
     [DataContract(Name = "TwoWayLinkedEntitiesCollection")]
-    public partial class TwoWayLinkedEntitiesCollection : IEquatable<TwoWayLinkedEntitiesCollection>
+    public partial class TwoWayLinkedEntitiesCollection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TwoWayLinkedEntitiesCollection" /> class.

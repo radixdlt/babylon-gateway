@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(MetadataU8ArrayValue), "U8Array")]
     [JsonSubtypes.KnownSubType(typeof(MetadataUrlValue), "Url")]
     [JsonSubtypes.KnownSubType(typeof(MetadataUrlArrayValue), "UrlArray")]
-    public partial class MetadataNonFungibleGlobalIdValue : MetadataTypedValue, IEquatable<MetadataNonFungibleGlobalIdValue>
+    public partial class MetadataNonFungibleGlobalIdValue : MetadataTypedValue
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataNonFungibleGlobalIdValue" /> class.

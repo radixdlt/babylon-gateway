@@ -99,7 +99,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(PublicKeyHashEddsaEd25519), "EddsaEd25519")]
     [JsonSubtypes.KnownSubType(typeof(PublicKeyHashEcdsaSecp256k1), "PublicKeyHashEcdsaSecp256k1")]
     [JsonSubtypes.KnownSubType(typeof(PublicKeyHashEddsaEd25519), "PublicKeyHashEddsaEd25519")]
-    public partial class PublicKeyHash : IEquatable<PublicKeyHash>
+    public partial class PublicKeyHash
     {
 
         /// <summary>

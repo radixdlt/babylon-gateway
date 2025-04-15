@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionPreviewResponseLogsInner
     /// </summary>
     [DataContract(Name = "TransactionPreviewResponse_logs_inner")]
-    public partial class TransactionPreviewResponseLogsInner : IEquatable<TransactionPreviewResponseLogsInner>
+    public partial class TransactionPreviewResponseLogsInner
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewResponseLogsInner" /> class.

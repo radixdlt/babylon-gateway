@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NonFungibleResourcesCollectionItemGloballyAggregatedAllOf
     /// </summary>
     [DataContract(Name = "NonFungibleResourcesCollectionItemGloballyAggregated_allOf")]
-    public partial class NonFungibleResourcesCollectionItemGloballyAggregatedAllOf : IEquatable<NonFungibleResourcesCollectionItemGloballyAggregatedAllOf>
+    public partial class NonFungibleResourcesCollectionItemGloballyAggregatedAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemGloballyAggregatedAllOf" /> class.

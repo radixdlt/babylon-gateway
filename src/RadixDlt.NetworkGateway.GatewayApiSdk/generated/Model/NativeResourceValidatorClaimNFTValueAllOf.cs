@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NativeResourceValidatorClaimNftValueAllOf
     /// </summary>
     [DataContract(Name = "NativeResourceValidatorClaimNftValue_allOf")]
-    public partial class NativeResourceValidatorClaimNftValueAllOf : IEquatable<NativeResourceValidatorClaimNftValueAllOf>
+    public partial class NativeResourceValidatorClaimNftValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeResourceValidatorClaimNftValueAllOf" /> class.

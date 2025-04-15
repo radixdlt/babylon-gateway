@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// PublicKeyEddsaEd25519AllOf
     /// </summary>
     [DataContract(Name = "PublicKeyEddsaEd25519_allOf")]
-    public partial class PublicKeyEddsaEd25519AllOf : IEquatable<PublicKeyEddsaEd25519AllOf>
+    public partial class PublicKeyEddsaEd25519AllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicKeyEddsaEd25519AllOf" /> class.
