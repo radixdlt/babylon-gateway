@@ -1,3 +1,9 @@
+## 1.10.2
+Release built: _not released yet_
+
+### Bug fixes
+- Fixed the 500 status code returned from `/transaction/committed-details` or `/stream/transactions` when the `receipt_events` or `detailed_events` opt-in was set to `true`, and an event with a recursive type of at least depth 3 was returned (e.g., a tuple nested inside a tuple nested inside another tuple).
+
 ## 1.10.1
 Release built: 6.03.2025
 
