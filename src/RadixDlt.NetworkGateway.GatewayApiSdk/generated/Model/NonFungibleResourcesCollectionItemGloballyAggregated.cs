@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "aggregation_level")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemGloballyAggregated), "Global")]
     [JsonSubtypes.KnownSubType(typeof(NonFungibleResourcesCollectionItemVaultAggregated), "Vault")]
-    public partial class NonFungibleResourcesCollectionItemGloballyAggregated : NonFungibleResourcesCollectionItem, IEquatable<NonFungibleResourcesCollectionItemGloballyAggregated>
+    public partial class NonFungibleResourcesCollectionItemGloballyAggregated : NonFungibleResourcesCollectionItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourcesCollectionItemGloballyAggregated" /> class.

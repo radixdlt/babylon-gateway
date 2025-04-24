@@ -111,7 +111,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorLiquidStakeUnitValue), "ValidatorLiquidStakeUnit")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceValidatorOwnerBadgeValue), "ValidatorOwnerBadge")]
     [JsonSubtypes.KnownSubType(typeof(NativeResourceXrdValue), "Xrd")]
-    public partial class NativeResourceSecp256k1SignatureResourceValue : NativeResourceDetails, IEquatable<NativeResourceSecp256k1SignatureResourceValue>
+    public partial class NativeResourceSecp256k1SignatureResourceValue : NativeResourceDetails
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeResourceSecp256k1SignatureResourceValue" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// RoyaltyAmount
     /// </summary>
     [DataContract(Name = "RoyaltyAmount")]
-    public partial class RoyaltyAmount : IEquatable<RoyaltyAmount>
+    public partial class RoyaltyAmount
     {
         /// <summary>
         /// Defines Unit

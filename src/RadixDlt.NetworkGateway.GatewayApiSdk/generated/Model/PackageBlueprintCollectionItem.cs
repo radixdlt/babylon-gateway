@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// PackageBlueprintCollectionItem
     /// </summary>
     [DataContract(Name = "PackageBlueprintCollectionItem")]
-    public partial class PackageBlueprintCollectionItem : IEquatable<PackageBlueprintCollectionItem>
+    public partial class PackageBlueprintCollectionItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageBlueprintCollectionItem" /> class.

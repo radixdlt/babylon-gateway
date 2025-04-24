@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// GatewayStatusResponse
     /// </summary>
     [DataContract(Name = "GatewayStatusResponse")]
-    public partial class GatewayStatusResponse : IEquatable<GatewayStatusResponse>
+    public partial class GatewayStatusResponse
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GatewayStatusResponse" /> class.

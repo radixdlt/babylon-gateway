@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ErrorResponse
     /// </summary>
     [DataContract(Name = "ErrorResponse")]
-    public partial class ErrorResponse : IEquatable<ErrorResponse>
+    public partial class ErrorResponse
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorResponse" /> class.

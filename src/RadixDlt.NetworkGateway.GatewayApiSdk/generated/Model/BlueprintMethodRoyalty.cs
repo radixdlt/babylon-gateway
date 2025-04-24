@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// BlueprintMethodRoyalty
     /// </summary>
     [DataContract(Name = "BlueprintMethodRoyalty")]
-    public partial class BlueprintMethodRoyalty : IEquatable<BlueprintMethodRoyalty>
+    public partial class BlueprintMethodRoyalty
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BlueprintMethodRoyalty" /> class.

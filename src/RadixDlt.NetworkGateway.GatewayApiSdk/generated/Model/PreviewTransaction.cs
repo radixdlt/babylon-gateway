@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "Compiled")]
     [JsonSubtypes.KnownSubType(typeof(CompiledPreviewTransaction), "CompiledPreviewTransaction")]
-    public partial class PreviewTransaction : IEquatable<PreviewTransaction>
+    public partial class PreviewTransaction
     {
 
         /// <summary>

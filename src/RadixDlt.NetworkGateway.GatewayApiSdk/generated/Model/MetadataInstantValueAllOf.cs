@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// MetadataInstantValueAllOf
     /// </summary>
     [DataContract(Name = "MetadataInstantValue_allOf")]
-    public partial class MetadataInstantValueAllOf : IEquatable<MetadataInstantValueAllOf>
+    public partial class MetadataInstantValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataInstantValueAllOf" /> class.

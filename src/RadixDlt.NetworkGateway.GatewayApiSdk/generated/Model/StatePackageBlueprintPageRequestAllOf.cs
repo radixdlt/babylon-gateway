@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StatePackageBlueprintPageRequestAllOf
     /// </summary>
     [DataContract(Name = "StatePackageBlueprintPageRequest_allOf")]
-    public partial class StatePackageBlueprintPageRequestAllOf : IEquatable<StatePackageBlueprintPageRequestAllOf>
+    public partial class StatePackageBlueprintPageRequestAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StatePackageBlueprintPageRequestAllOf" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ProgrammaticScryptoSborValueNonFungibleLocalIdAllOf
     /// </summary>
     [DataContract(Name = "ProgrammaticScryptoSborValueNonFungibleLocalId_allOf")]
-    public partial class ProgrammaticScryptoSborValueNonFungibleLocalIdAllOf : IEquatable<ProgrammaticScryptoSborValueNonFungibleLocalIdAllOf>
+    public partial class ProgrammaticScryptoSborValueNonFungibleLocalIdAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueNonFungibleLocalIdAllOf" /> class.

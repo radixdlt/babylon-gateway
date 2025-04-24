@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountLockerAddress
     /// </summary>
     [DataContract(Name = "AccountLockerAddress")]
-    public partial class AccountLockerAddress : IEquatable<AccountLockerAddress>
+    public partial class AccountLockerAddress
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountLockerAddress" /> class.

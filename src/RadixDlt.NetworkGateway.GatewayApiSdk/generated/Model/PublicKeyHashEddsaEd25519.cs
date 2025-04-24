@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "key_hash_type")]
     [JsonSubtypes.KnownSubType(typeof(PublicKeyHashEcdsaSecp256k1), "EcdsaSecp256k1")]
     [JsonSubtypes.KnownSubType(typeof(PublicKeyHashEddsaEd25519), "EddsaEd25519")]
-    public partial class PublicKeyHashEddsaEd25519 : PublicKeyHash, IEquatable<PublicKeyHashEddsaEd25519>
+    public partial class PublicKeyHashEddsaEd25519 : PublicKeyHash
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicKeyHashEddsaEd25519" /> class.

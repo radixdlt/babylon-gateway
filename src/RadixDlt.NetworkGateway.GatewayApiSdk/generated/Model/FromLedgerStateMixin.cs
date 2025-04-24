@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// defines lower boundary (inclusive) for queried data. i.e &#x60;{ \&quot;from_state_version\&quot; &#x3D; {\&quot;epoch\&quot; &#x3D; 10} }&#x60;, will return data from epoch 10 till current max ledger tip.
     /// </summary>
     [DataContract(Name = "FromLedgerStateMixin")]
-    public partial class FromLedgerStateMixin : IEquatable<FromLedgerStateMixin>
+    public partial class FromLedgerStateMixin
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FromLedgerStateMixin" /> class.

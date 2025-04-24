@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateEntityMetadataPageRequest
     /// </summary>
     [DataContract(Name = "StateEntityMetadataPageRequest")]
-    public partial class StateEntityMetadataPageRequest : IEquatable<StateEntityMetadataPageRequest>
+    public partial class StateEntityMetadataPageRequest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntityMetadataPageRequest" /> class.

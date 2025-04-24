@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntityMetadataItemValue
     /// </summary>
     [DataContract(Name = "EntityMetadataItemValue")]
-    public partial class EntityMetadataItemValue : IEquatable<EntityMetadataItemValue>
+    public partial class EntityMetadataItemValue
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataItemValue" /> class.

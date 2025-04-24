@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountDepositPreValidationResourceSpecificBehaviourItem
     /// </summary>
     [DataContract(Name = "AccountDepositPreValidationResourceSpecificBehaviourItem")]
-    public partial class AccountDepositPreValidationResourceSpecificBehaviourItem : IEquatable<AccountDepositPreValidationResourceSpecificBehaviourItem>
+    public partial class AccountDepositPreValidationResourceSpecificBehaviourItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountDepositPreValidationResourceSpecificBehaviourItem" /> class.

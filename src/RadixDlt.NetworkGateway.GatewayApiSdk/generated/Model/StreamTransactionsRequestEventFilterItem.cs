@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StreamTransactionsRequestEventFilterItem
     /// </summary>
     [DataContract(Name = "StreamTransactionsRequestEventFilterItem")]
-    public partial class StreamTransactionsRequestEventFilterItem : IEquatable<StreamTransactionsRequestEventFilterItem>
+    public partial class StreamTransactionsRequestEventFilterItem
     {
         /// <summary>
         /// Defines Event

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Account resource preferences collection
     /// </summary>
     [DataContract(Name = "AccountAuthorizedDepositorsCollection")]
-    public partial class AccountAuthorizedDepositorsCollection : IEquatable<AccountAuthorizedDepositorsCollection>
+    public partial class AccountAuthorizedDepositorsCollection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsCollection" /> class.

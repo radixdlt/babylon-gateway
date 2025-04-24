@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// CursorLimitMixin
     /// </summary>
     [DataContract(Name = "CursorLimitMixin")]
-    public partial class CursorLimitMixin : IEquatable<CursorLimitMixin>
+    public partial class CursorLimitMixin
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CursorLimitMixin" /> class.

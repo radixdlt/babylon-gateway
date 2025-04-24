@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Entity metadata collection.
     /// </summary>
     [DataContract(Name = "EntityMetadataCollection")]
-    public partial class EntityMetadataCollection : IEquatable<EntityMetadataCollection>
+    public partial class EntityMetadataCollection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityMetadataCollection" /> class.

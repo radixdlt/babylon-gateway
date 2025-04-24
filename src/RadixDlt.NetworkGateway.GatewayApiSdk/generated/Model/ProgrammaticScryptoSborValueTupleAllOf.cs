@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ProgrammaticScryptoSborValueTupleAllOf
     /// </summary>
     [DataContract(Name = "ProgrammaticScryptoSborValueTuple_allOf")]
-    public partial class ProgrammaticScryptoSborValueTupleAllOf : IEquatable<ProgrammaticScryptoSborValueTupleAllOf>
+    public partial class ProgrammaticScryptoSborValueTupleAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValueTupleAllOf" /> class.

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionDetailsOptIns
     /// </summary>
     [DataContract(Name = "TransactionDetailsOptIns")]
-    public partial class TransactionDetailsOptIns : IEquatable<TransactionDetailsOptIns>
+    public partial class TransactionDetailsOptIns
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionDetailsOptIns" /> class.

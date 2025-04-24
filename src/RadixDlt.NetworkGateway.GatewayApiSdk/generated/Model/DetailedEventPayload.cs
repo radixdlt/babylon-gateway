@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Event payload decoded into Programmatic JSON using its schema.
     /// </summary>
     [DataContract(Name = "DetailedEventPayload")]
-    public partial class DetailedEventPayload : IEquatable<DetailedEventPayload>
+    public partial class DetailedEventPayload
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DetailedEventPayload" /> class.

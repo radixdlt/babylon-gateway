@@ -97,7 +97,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(EntityMethodEventEmitter), "EntityMethod")]
     [JsonSubtypes.KnownSubType(typeof(PackageFunctionEventEmitter), "PackageFunction")]
-    public partial class PackageFunctionEventEmitter : DetailedEventEmitter, IEquatable<PackageFunctionEventEmitter>
+    public partial class PackageFunctionEventEmitter : DetailedEventEmitter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageFunctionEventEmitter" /> class.

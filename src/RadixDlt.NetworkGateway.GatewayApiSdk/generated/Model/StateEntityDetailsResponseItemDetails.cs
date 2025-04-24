@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleResourceDetails), "StateEntityDetailsResponseNonFungibleResourceDetails")]
     [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponseNonFungibleVaultDetails), "StateEntityDetailsResponseNonFungibleVaultDetails")]
     [JsonSubtypes.KnownSubType(typeof(StateEntityDetailsResponsePackageDetails), "StateEntityDetailsResponsePackageDetails")]
-    public partial class StateEntityDetailsResponseItemDetails : IEquatable<StateEntityDetailsResponseItemDetails>
+    public partial class StateEntityDetailsResponseItemDetails
     {
 
         /// <summary>

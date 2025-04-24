@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateEntitySchemaPageRequestAllOf
     /// </summary>
     [DataContract(Name = "StateEntitySchemaPageRequest_allOf")]
-    public partial class StateEntitySchemaPageRequestAllOf : IEquatable<StateEntitySchemaPageRequestAllOf>
+    public partial class StateEntitySchemaPageRequestAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateEntitySchemaPageRequestAllOf" /> class.

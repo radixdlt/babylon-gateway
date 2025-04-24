@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntitySchemaCollectionAllOf
     /// </summary>
     [DataContract(Name = "EntitySchemaCollection_allOf")]
-    public partial class EntitySchemaCollectionAllOf : IEquatable<EntitySchemaCollectionAllOf>
+    public partial class EntitySchemaCollectionAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitySchemaCollectionAllOf" /> class.

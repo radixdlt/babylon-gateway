@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionSubmitRequest
     /// </summary>
     [DataContract(Name = "TransactionSubmitRequest")]
-    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>
+    public partial class TransactionSubmitRequest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.

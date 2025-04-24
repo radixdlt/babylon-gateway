@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ValidatorCollectionItemActiveInEpoch
     /// </summary>
     [DataContract(Name = "ValidatorCollectionItemActiveInEpoch")]
-    public partial class ValidatorCollectionItemActiveInEpoch : IEquatable<ValidatorCollectionItemActiveInEpoch>
+    public partial class ValidatorCollectionItemActiveInEpoch
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorCollectionItemActiveInEpoch" /> class.

@@ -99,7 +99,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(SchemaLocalEventPayloadTypeDefinition), "SchemaLocalEventPayloadTypeDefinition")]
     [JsonSubtypes.KnownSubType(typeof(WellKnownEventPayloadTypeDefinition), "WellKnown")]
     [JsonSubtypes.KnownSubType(typeof(WellKnownEventPayloadTypeDefinition), "WellKnownEventPayloadTypeDefinition")]
-    public partial class DetailedEventPayloadTypeDefinition : IEquatable<DetailedEventPayloadTypeDefinition>
+    public partial class DetailedEventPayloadTypeDefinition
     {
 
         /// <summary>

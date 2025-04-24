@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntitiesByRoleRequirementLookupCollectionAllOf
     /// </summary>
     [DataContract(Name = "EntitiesByRoleRequirementLookupCollection_allOf")]
-    public partial class EntitiesByRoleRequirementLookupCollectionAllOf : IEquatable<EntitiesByRoleRequirementLookupCollectionAllOf>
+    public partial class EntitiesByRoleRequirementLookupCollectionAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitiesByRoleRequirementLookupCollectionAllOf" /> class.

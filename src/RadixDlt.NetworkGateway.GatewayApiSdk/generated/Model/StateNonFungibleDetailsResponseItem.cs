@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateNonFungibleDetailsResponseItem
     /// </summary>
     [DataContract(Name = "StateNonFungibleDetailsResponseItem")]
-    public partial class StateNonFungibleDetailsResponseItem : IEquatable<StateNonFungibleDetailsResponseItem>
+    public partial class StateNonFungibleDetailsResponseItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateNonFungibleDetailsResponseItem" /> class.

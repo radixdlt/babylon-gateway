@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ProgrammaticScryptoSborValuePreciseDecimalAllOf
     /// </summary>
     [DataContract(Name = "ProgrammaticScryptoSborValuePreciseDecimal_allOf")]
-    public partial class ProgrammaticScryptoSborValuePreciseDecimalAllOf : IEquatable<ProgrammaticScryptoSborValuePreciseDecimalAllOf>
+    public partial class ProgrammaticScryptoSborValuePreciseDecimalAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgrammaticScryptoSborValuePreciseDecimalAllOf" /> class.

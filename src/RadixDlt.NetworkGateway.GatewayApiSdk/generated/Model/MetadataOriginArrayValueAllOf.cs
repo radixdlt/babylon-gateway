@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// MetadataOriginArrayValueAllOf
     /// </summary>
     [DataContract(Name = "MetadataOriginArrayValue_allOf")]
-    public partial class MetadataOriginArrayValueAllOf : IEquatable<MetadataOriginArrayValueAllOf>
+    public partial class MetadataOriginArrayValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataOriginArrayValueAllOf" /> class.

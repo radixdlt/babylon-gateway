@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountLockerVaultCollectionAllOf
     /// </summary>
     [DataContract(Name = "AccountLockerVaultCollection_allOf")]
-    public partial class AccountLockerVaultCollectionAllOf : IEquatable<AccountLockerVaultCollectionAllOf>
+    public partial class AccountLockerVaultCollectionAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountLockerVaultCollectionAllOf" /> class.

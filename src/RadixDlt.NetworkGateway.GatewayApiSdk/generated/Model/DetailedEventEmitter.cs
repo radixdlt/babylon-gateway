@@ -99,7 +99,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(EntityMethodEventEmitter), "EntityMethodEventEmitter")]
     [JsonSubtypes.KnownSubType(typeof(PackageFunctionEventEmitter), "PackageFunction")]
     [JsonSubtypes.KnownSubType(typeof(PackageFunctionEventEmitter), "PackageFunctionEventEmitter")]
-    public partial class DetailedEventEmitter : IEquatable<DetailedEventEmitter>
+    public partial class DetailedEventEmitter
     {
 
         /// <summary>

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ValidationErrorsAtPath
     /// </summary>
     [DataContract(Name = "ValidationErrorsAtPath")]
-    public partial class ValidationErrorsAtPath : IEquatable<ValidationErrorsAtPath>
+    public partial class ValidationErrorsAtPath
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidationErrorsAtPath" /> class.

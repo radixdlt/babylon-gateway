@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateEntityDetailsRequest
     /// </summary>
     [DataContract(Name = "StateEntityDetailsRequest")]
-    public partial class StateEntityDetailsRequest : IEquatable<StateEntityDetailsRequest>
+    public partial class StateEntityDetailsRequest
     {
 
         /// <summary>

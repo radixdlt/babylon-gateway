@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateAccountAuthorizedDepositorsPageResponseAllOf
     /// </summary>
     [DataContract(Name = "StateAccountAuthorizedDepositorsPageResponse_allOf")]
-    public partial class StateAccountAuthorizedDepositorsPageResponseAllOf : IEquatable<StateAccountAuthorizedDepositorsPageResponseAllOf>
+    public partial class StateAccountAuthorizedDepositorsPageResponseAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateAccountAuthorizedDepositorsPageResponseAllOf" /> class.

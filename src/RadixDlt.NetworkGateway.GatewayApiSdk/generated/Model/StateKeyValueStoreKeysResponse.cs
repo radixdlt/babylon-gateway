@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// StateKeyValueStoreKeysResponse
     /// </summary>
     [DataContract(Name = "StateKeyValueStoreKeysResponse")]
-    public partial class StateKeyValueStoreKeysResponse : IEquatable<StateKeyValueStoreKeysResponse>
+    public partial class StateKeyValueStoreKeysResponse
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StateKeyValueStoreKeysResponse" /> class.

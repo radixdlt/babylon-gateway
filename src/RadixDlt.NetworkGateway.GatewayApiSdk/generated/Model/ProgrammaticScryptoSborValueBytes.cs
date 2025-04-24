@@ -117,7 +117,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU32), "U32")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU64), "U64")]
     [JsonSubtypes.KnownSubType(typeof(ProgrammaticScryptoSborValueU8), "U8")]
-    public partial class ProgrammaticScryptoSborValueBytes : ProgrammaticScryptoSborValue, IEquatable<ProgrammaticScryptoSborValueBytes>
+    public partial class ProgrammaticScryptoSborValueBytes : ProgrammaticScryptoSborValue
     {
 
         /// <summary>

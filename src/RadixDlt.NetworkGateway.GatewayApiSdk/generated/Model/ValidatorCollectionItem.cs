@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// ValidatorCollectionItem
     /// </summary>
     [DataContract(Name = "ValidatorCollectionItem")]
-    public partial class ValidatorCollectionItem : IEquatable<ValidatorCollectionItem>
+    public partial class ValidatorCollectionItem
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatorCollectionItem" /> class.

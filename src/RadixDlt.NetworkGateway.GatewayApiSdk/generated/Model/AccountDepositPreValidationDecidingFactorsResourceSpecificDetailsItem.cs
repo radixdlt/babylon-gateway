@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem
     /// </summary>
     [DataContract(Name = "AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem")]
-    public partial class AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem : IEquatable<AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem>
+    public partial class AccountDepositPreValidationDecidingFactorsResourceSpecificDetailsItem
     {
 
         /// <summary>

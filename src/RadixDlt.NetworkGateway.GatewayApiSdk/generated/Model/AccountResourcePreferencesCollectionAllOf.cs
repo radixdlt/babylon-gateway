@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountResourcePreferencesCollectionAllOf
     /// </summary>
     [DataContract(Name = "AccountResourcePreferencesCollection_allOf")]
-    public partial class AccountResourcePreferencesCollectionAllOf : IEquatable<AccountResourcePreferencesCollectionAllOf>
+    public partial class AccountResourcePreferencesCollectionAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountResourcePreferencesCollectionAllOf" /> class.

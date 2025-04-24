@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// PreviewFlags
     /// </summary>
     [DataContract(Name = "PreviewFlags")]
-    public partial class PreviewFlags : IEquatable<PreviewFlags>
+    public partial class PreviewFlags
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PreviewFlags" /> class.

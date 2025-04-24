@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Non-fungible resources collection.
     /// </summary>
     [DataContract(Name = "NonFungibleResourcesCollection")]
-    public partial class NonFungibleResourcesCollection : IEquatable<NonFungibleResourcesCollection>
+    public partial class NonFungibleResourcesCollection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourcesCollection" /> class.

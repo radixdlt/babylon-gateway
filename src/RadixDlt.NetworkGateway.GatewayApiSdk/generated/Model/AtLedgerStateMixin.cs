@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// defines upper boundary (inclusive) for queried data. i.e &#x60;{ \&quot;at_state_version\&quot; &#x3D; {\&quot;epoch\&quot; &#x3D; 10} }&#x60;, will return data till 10 epoch.
     /// </summary>
     [DataContract(Name = "AtLedgerStateMixin")]
-    public partial class AtLedgerStateMixin : IEquatable<AtLedgerStateMixin>
+    public partial class AtLedgerStateMixin
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AtLedgerStateMixin" /> class.

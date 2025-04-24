@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionStatusResponseKnownPayloadItem
     /// </summary>
     [DataContract(Name = "TransactionStatusResponseKnownPayloadItem")]
-    public partial class TransactionStatusResponseKnownPayloadItem : IEquatable<TransactionStatusResponseKnownPayloadItem>
+    public partial class TransactionStatusResponseKnownPayloadItem
     {
 
         /// <summary>

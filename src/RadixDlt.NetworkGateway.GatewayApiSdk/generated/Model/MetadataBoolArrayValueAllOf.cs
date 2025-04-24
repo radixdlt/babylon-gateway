@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// MetadataBoolArrayValueAllOf
     /// </summary>
     [DataContract(Name = "MetadataBoolArrayValue_allOf")]
-    public partial class MetadataBoolArrayValueAllOf : IEquatable<MetadataBoolArrayValueAllOf>
+    public partial class MetadataBoolArrayValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataBoolArrayValueAllOf" /> class.

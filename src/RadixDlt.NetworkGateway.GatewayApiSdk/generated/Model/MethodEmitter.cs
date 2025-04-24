@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// Details of the component module method that emitted the event.
     /// </summary>
     [DataContract(Name = "MethodEmitter")]
-    public partial class MethodEmitter : IEquatable<MethodEmitter>
+    public partial class MethodEmitter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodEmitter" /> class.

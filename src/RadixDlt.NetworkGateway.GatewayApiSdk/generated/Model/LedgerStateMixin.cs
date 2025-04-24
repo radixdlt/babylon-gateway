@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// LedgerStateMixin
     /// </summary>
     [DataContract(Name = "LedgerStateMixin")]
-    public partial class LedgerStateMixin : IEquatable<LedgerStateMixin>
+    public partial class LedgerStateMixin
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LedgerStateMixin" /> class.

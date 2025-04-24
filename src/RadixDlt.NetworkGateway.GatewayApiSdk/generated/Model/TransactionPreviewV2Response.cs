@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// TransactionPreviewV2Response
     /// </summary>
     [DataContract(Name = "TransactionPreviewV2Response")]
-    public partial class TransactionPreviewV2Response : IEquatable<TransactionPreviewV2Response>
+    public partial class TransactionPreviewV2Response
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewV2Response" /> class.

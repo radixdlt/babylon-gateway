@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// SchemaLocalEventPayloadTypeDefinitionAllOf
     /// </summary>
     [DataContract(Name = "SchemaLocalEventPayloadTypeDefinition_allOf")]
-    public partial class SchemaLocalEventPayloadTypeDefinitionAllOf : IEquatable<SchemaLocalEventPayloadTypeDefinitionAllOf>
+    public partial class SchemaLocalEventPayloadTypeDefinitionAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SchemaLocalEventPayloadTypeDefinitionAllOf" /> class.

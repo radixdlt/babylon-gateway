@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// NativeResourceAccessControllerRecoveryBadgeValueAllOf
     /// </summary>
     [DataContract(Name = "NativeResourceAccessControllerRecoveryBadgeValue_allOf")]
-    public partial class NativeResourceAccessControllerRecoveryBadgeValueAllOf : IEquatable<NativeResourceAccessControllerRecoveryBadgeValueAllOf>
+    public partial class NativeResourceAccessControllerRecoveryBadgeValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeResourceAccessControllerRecoveryBadgeValueAllOf" /> class.

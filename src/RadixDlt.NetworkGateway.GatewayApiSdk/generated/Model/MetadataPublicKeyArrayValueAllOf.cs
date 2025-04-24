@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// MetadataPublicKeyArrayValueAllOf
     /// </summary>
     [DataContract(Name = "MetadataPublicKeyArrayValue_allOf")]
-    public partial class MetadataPublicKeyArrayValueAllOf : IEquatable<MetadataPublicKeyArrayValueAllOf>
+    public partial class MetadataPublicKeyArrayValueAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataPublicKeyArrayValueAllOf" /> class.

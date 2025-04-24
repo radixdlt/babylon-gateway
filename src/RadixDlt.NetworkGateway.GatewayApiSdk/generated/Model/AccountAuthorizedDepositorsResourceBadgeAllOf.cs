@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// AccountAuthorizedDepositorsResourceBadgeAllOf
     /// </summary>
     [DataContract(Name = "AccountAuthorizedDepositorsResourceBadge_allOf")]
-    public partial class AccountAuthorizedDepositorsResourceBadgeAllOf : IEquatable<AccountAuthorizedDepositorsResourceBadgeAllOf>
+    public partial class AccountAuthorizedDepositorsResourceBadgeAllOf
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountAuthorizedDepositorsResourceBadgeAllOf" /> class.
