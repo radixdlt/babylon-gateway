@@ -49,6 +49,7 @@ java -jar ./openapi-generator-cli-6.1.1-custom.jar \
     -i "$specLocation" \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
+    -t "template-overrides" \
     --library httpclient \
     --inline-schema-name-defaults SKIP_SCHEMA_REUSE=true \
     --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useOneOfDiscriminatorLookup=true,validatable=false

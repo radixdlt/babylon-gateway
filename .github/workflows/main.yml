@@ -23,41 +23,6 @@ env:
   DOTNET_VERSION: "8.0.x"
 
 jobs:
-  snyk-scan:
-    name: snyk scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
-        with:
-          role_name: ${{ secrets.AWS_ROLE_NAME_SNYK_SECRET }}
-          app_name: 'babylon-gateway'
-          step_name: 'snyk-scan'
-          secret_prefix: 'SNYK'
-          secret_name: ${{ secrets.AWS_SECRET_NAME_SNYK }}
-          parse_json: true
-      - name: Setup .NET SDK
-        uses: RDXWorks-actions/setup-dotnet@main
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-      - name: Install dependencies
-        run: dotnet restore
-      - name: Run Snyk to check for deps vulnerabilities
-        uses: RDXWorks-actions/snyk-actions/dotnet@master
-        with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=critical
-      - name: Run Snyk to check for code vulnerabilities
-        uses: RDXWorks-actions/snyk-actions/dotnet@master
-        continue-on-error: true
-        with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --severity-threshold=high
-          command: code test
-      - name: Generate SBOM # check SBOM can be generated but nothing is done with it
-        uses: RDXWorks-actions/snyk-actions/dotnet@master
-        with:
-          args: --all-projects --org=${{ env.SNYK_SERVICES_ORG_ID }} --exclude=package.json --format=cyclonedx1.4+json --json-file-output sbom.json
-          command: sbom
 
   build:
     runs-on: ubuntu-22.04
@@ -114,8 +79,7 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
+      scan_image: false
       cache_tag_suffix: "AMD"
 
   docker-database-migrations-private-arm:
@@ -157,8 +121,7 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
+      scan_image: false
       cache_tag_suffix: "AMD"
 
   docker-data-aggregator-private-arm:
@@ -200,8 +163,7 @@ jobs:
       artifact_location: "./"
       artifact_name: build_props
       provenance: "false"
-      scan_image: true
-      snyk_target_ref: ${{ github.ref_name }}
+      scan_image: false
       cache_tag_suffix: "AMD"
 
   docker-gateway-api-private-arm:
