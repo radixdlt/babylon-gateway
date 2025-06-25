@@ -64,6 +64,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using System;
 
 namespace GatewayApi.SlowRequestLogging;
