@@ -4,6 +4,13 @@ Release built: _not released yet_
 ### Database changes
 - Fixed an invalid `index_in_epoch` value for transactions processed in a batch when they belonged to different epochs.
 
+## 1.10.3
+Release built: 25.06.2025
+
+### What’s new?
+- Added a new configuration parameter, `GatewayApi__SlowRequestLogging__RequestBodyLogLimit` (default `2048`), which controls the body log limit for slow requests.
+- Added a new configuration parameter, `GatewayApi__SlowRequestLogging__SlowRequestThreshold` (default `250ms`), which controls the threshold at which a request is considered slow and logged.
+
 ## 1.10.2
 Release built: 23.04.2025
 

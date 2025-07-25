@@ -103,6 +103,7 @@ public static class ServiceCollectionExtensions
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
             .AddValidatableOptionsAtSection<PostgresIntegrationOptions, PostgresIntegrationOptionsValidator>("GatewayApi:PostgresIntegration")
             .AddValidatableOptionsAtSection<SlowQueryLoggingOptions, SlowQueryLoggingOptionsValidator>("GatewayApi:SlowQueryLogging")
+            .AddValidatableOptionsAtSection<SlowRequestLoggingOptions, SlowRequestLoggingOptionsValidator>("GatewayApi:SlowRequestLogging")
             .AddValidatableOptionsAtSection<CoreApiIntegrationOptions, CoreApiIntegrationOptionsValidator>("GatewayApi:CoreApiIntegration")
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
             .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");

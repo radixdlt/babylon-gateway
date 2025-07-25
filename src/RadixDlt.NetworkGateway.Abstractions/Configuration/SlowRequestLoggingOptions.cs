@@ -62,16 +62,26 @@
  * permissions under this License.
  */
 
+using FluentValidation;
 using System;
 using System.Text;
 
-namespace GatewayApi.SlowRequestLogging;
+namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 
 public sealed class SlowRequestLoggingOptions
 {
-    public int RequestBodyLogLimit { get; set; } = 1 * 1024;
+    public int RequestBodyLogLimit { get; set; } = 2 * 1024;
 
     public TimeSpan SlowRequestThreshold { get; set; } = TimeSpan.FromMilliseconds(250);
 
     public Encoding Encoding { get; set; } = Encoding.UTF8;
+}
+
+public class SlowRequestLoggingOptionsValidator : AbstractOptionsValidator<SlowRequestLoggingOptions>
+{
+    public SlowRequestLoggingOptionsValidator()
+    {
+        RuleFor(x => x.RequestBodyLogLimit).GreaterThan(0);
+        RuleFor(x => x.SlowRequestThreshold).GreaterThan(TimeSpan.Zero);
+    }
 }
