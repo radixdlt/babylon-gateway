@@ -1,3 +1,9 @@
+## 1.10.4
+Release built: 29.10.2025
+
+### What’s new?
+- Updated base Docker images to resolve .NET security vulnerabilities.
+
 ## 1.10.3
 Release built: 25.06.2025
 
