@@ -108,11 +108,12 @@ internal static class ManifestAddressesExtractor
 
         var manifestSummary = manifest.StaticallyAnalyze(networkId);
 
-        var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
-        var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
-        var accountsWithdrawnFrom = manifestSummary.accountsWithdrawnFrom.Select(x => (EntityAddress)x.AddressString()).ToList();
-        var accountsDepositedInto = manifestSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
-        var identitiesRequiringAuth = manifestSummary.identitiesRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var presentedProofs = ExtractProofs(manifestSummary.proofsCreatedSummary.createdProofs);
+
+        var accountsRequiringAuth = manifestSummary.entitiesRequiringAuthSummary.accounts.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var identitiesRequiringAuth = manifestSummary.entitiesRequiringAuthSummary.identities.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsWithdrawnFrom = manifestSummary.accountInteractionsSummary.accountsWithdrawnFrom.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsDepositedInto = manifestSummary.accountInteractionsSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
 
         var packageAddresses = allAddresses
             .Where(x => x.Key == ToolkitModel.EntityType.GlobalPackage)
@@ -164,14 +165,13 @@ internal static class ManifestAddressesExtractor
     public static ManifestAddresses ExtractAddresses(ToolkitModel.TransactionManifestV2 manifest, byte networkId)
     {
         var allAddresses = manifest.ExtractAddresses();
-
         var manifestSummary = manifest.StaticallyAnalyze(networkId);
 
-        var presentedProofs = ExtractProofs(manifestSummary.presentedProofs);
-        var accountsRequiringAuth = manifestSummary.accountsRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
-        var accountsWithdrawnFrom = manifestSummary.accountsWithdrawnFrom.Select(x => (EntityAddress)x.AddressString()).ToList();
-        var accountsDepositedInto = manifestSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
-        var identitiesRequiringAuth = manifestSummary.identitiesRequiringAuth.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var presentedProofs = ExtractProofs(manifestSummary.proofsCreatedSummary.createdProofs);
+        var accountsRequiringAuth = manifestSummary.entitiesRequiringAuthSummary.accounts.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var identitiesRequiringAuth = manifestSummary.entitiesRequiringAuthSummary.identities.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsWithdrawnFrom = manifestSummary.accountInteractionsSummary.accountsWithdrawnFrom.Select(x => (EntityAddress)x.AddressString()).ToList();
+        var accountsDepositedInto = manifestSummary.accountInteractionsSummary.accountsDepositedInto.Select(x => (EntityAddress)x.AddressString()).ToList();
 
         var packageAddresses = allAddresses
             .Where(x => x.Key == ToolkitModel.EntityType.GlobalPackage)

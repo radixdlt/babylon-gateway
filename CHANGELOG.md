@@ -1,3 +1,9 @@
+## 1.10.5
+Release built: _TO_BE_RELEASED_
+
+### What’s new?
+- Updated Radix Engine Toolkit to 2.3.1 to resolve security vulnerabilities.
+
 ## 1.10.4
 Release built: 29.10.2025
 
