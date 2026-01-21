@@ -9,7 +9,7 @@ on:
 
 jobs:
   publish-gateway-sdk-npmjs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./sdk/typescript
@@ -18,22 +18,16 @@ jobs:
       contents: read
     steps:
       - uses: RDXWorks-actions/checkout@main
-      - uses: ./.github/actions/fetch-secrets
-        with:
-          role_name: "arn:aws:iam::308190735829:role/gh-babylon-gateway-secrets-read-access"
-          app_name: "babylon-gateway"
-          step_name: "publish-gateway-sdk-npmjs"
-          secret_prefix: "NPM"
-          secret_name: "github-actions/radixdlt/babylon-gateway/npm-publishing-secret"
-          parse_json: true
+
       - name: Use Node.js
         uses: RDXWorks-actions/setup-node@main
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-        env:
-          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
-      - run: cat $NPM_CONFIG_USERCONFIG
+      
+      - name: Upgrade npm
+        run: npm i -g npm@^11.5.1
+      
       - name: Build alphanet-gateway-sdk
         env:
           VITE_SDK_VERSION: ${{ github.event.inputs.package_version_number || steps.setup_tags.outputs.version-tag }}
@@ -56,8 +50,6 @@ jobs:
           field: version
           value: ${{ github.event.inputs.package_version_number || steps.setup_tags.outputs.version-tag }}
 
-      - run: |
-          npm config set access public
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+      - name: Publish
+        run: env -u NODE_AUTH_TOKEN -u NPM_CONFIG_USERCONFIG npm publish --access public
+  
