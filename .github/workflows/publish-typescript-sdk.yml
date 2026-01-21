@@ -22,7 +22,7 @@ jobs:
       - name: Use Node.js
         uses: RDXWorks-actions/setup-node@main
         with:
-          node-version: "18.x"
+          node-version: "20.x"
           registry-url: "https://registry.npmjs.org"
       
       - name: Upgrade npm
