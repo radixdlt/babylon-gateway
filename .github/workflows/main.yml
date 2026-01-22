@@ -235,9 +235,6 @@ jobs:
       - join-migrations-images
       - setup-tags
     if: github.event_name == 'pull_request'
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
