@@ -757,7 +757,7 @@
       },
       "RadixDlt.RadixEngineToolkit": {
         "type": "CentralTransitive",
-        "requested": "[2.3.1, )",
+        "requested": "[2.3.4, )",
         "resolved": "2.3.4",
         "contentHash": "8IMvObwrfsla0U5cw35e98oaV3K2LdWFMJVEfe08Fb+I+1LvHI6YScN1Bu2I/7FY+He/pjZ20e3Q70MRI2c7AQ=="
       }
