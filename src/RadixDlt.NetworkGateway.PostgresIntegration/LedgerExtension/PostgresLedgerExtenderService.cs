@@ -94,6 +94,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
 
     private readonly ILogger<PostgresLedgerExtenderService> _logger;
     private readonly ILogger<EntitiesByRoleRequirementProcessor> _entitiesByRoleRequirementProcessorLogger;
+    private readonly ILogger<ManifestProcessor> _manifestProcessorLogger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ITopOfLedgerProvider _topOfLedgerProvider;
@@ -111,7 +112,8 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         ITopOfLedgerProvider topOfLedgerProvider,
         IOptionsMonitor<StorageOptions> storageOptionsMonitor,
         IOptionsMonitor<LedgerProcessorsOptions> ledgerProcessorsOptionsMonitor,
-        ILogger<EntitiesByRoleRequirementProcessor> entitiesByRoleRequirementProcessorLogger)
+        ILogger<EntitiesByRoleRequirementProcessor> entitiesByRoleRequirementProcessorLogger,
+        ILogger<ManifestProcessor> manifestProcessorLogger)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
@@ -122,6 +124,7 @@ internal class PostgresLedgerExtenderService : ILedgerExtenderService
         _storageOptionsMonitor = storageOptionsMonitor;
         _ledgerProcessorsOptionsMonitor = ledgerProcessorsOptionsMonitor;
         _entitiesByRoleRequirementProcessorLogger = entitiesByRoleRequirementProcessorLogger;
+        _manifestProcessorLogger = manifestProcessorLogger;
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token = default)
@@ -272,7 +275,7 @@ UPDATE pending_transactions
         // Have to be created here as we're sharing them between
         // - ledgerTransactionProcessor (produces manifest class for transaction)
         // - LedgerTransactionMarkersProcessor (produces markers for manifest addresses and markers for manifest classes)
-        var manifestProcessor = new ManifestProcessor(processorContext, referencedEntities, networkConfiguration);
+        var manifestProcessor = new ManifestProcessor(processorContext, referencedEntities, networkConfiguration, _manifestProcessorLogger);
 
         // Have to be created here as we're sharing them between
         // - ledgerTransactionProcessor (produces affected global entities per transaction)

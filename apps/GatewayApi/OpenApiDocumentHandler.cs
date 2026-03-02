@@ -70,7 +70,6 @@ using Microsoft.OpenApi.Writers;
 using RadixDlt.NetworkGateway.Abstractions.Network;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -80,6 +79,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace GatewayApi;
 
@@ -233,15 +233,15 @@ public static class OpenApiDocumentHandler
         var privateKey = new byte[32];
         random.NextBytes(privateKey);
 
-        var manifest = new ManifestV2Builder(networkId)
+        var manifest = new ToolkitModel.ManifestV2Builder(networkId)
             .FaucetLockFee()
             .Build();
 
         return Convert.ToHexString(
-            new PreviewTransactionV2Builder()
+            new ToolkitModel.PreviewTransactionV2Builder()
                 .Manifest(manifest)
                 .IntentHeader(
-                    new IntentHeaderV2(
+                    new ToolkitModel.IntentHeaderV2(
                         networkId,
                         currentEpoch ?? 1UL,
                         currentEpoch.HasValue ? currentEpoch.Value + 100UL : 1000UL,
@@ -249,8 +249,8 @@ public static class OpenApiDocumentHandler
                         null,
                         1)
                 )
-                .TransactionHeader(new TransactionHeaderV2(PrivateKey.NewEd25519(privateKey).PublicKey(), false, 5U * 100u))
-                .Message(new MessageV2.None())
+                .TransactionHeader(new ToolkitModel.TransactionHeaderV2(ToolkitModel.PrivateKey.NewEd25519(privateKey).PublicKey(), false, 5U * 100u))
+                .Message(new ToolkitModel.MessageV2.None())
                 .Build()
         );
     }

@@ -65,8 +65,8 @@
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.PostgresIntegration.Utils;
-using RadixEngineToolkit;
 using System.Collections.Generic;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension.Processors.LedgerTransactionMarkers;
 
@@ -85,7 +85,7 @@ internal class EventLedgerTransactionMarkerProcessor : ITransactionMarkerProcess
         return _ledgerTransactionMarkersToAdd;
     }
 
-    public void VisitDecodedEvent(TypedNativeEvent decodedEvent, ReferencedEntity eventEmitterEntity, long stateVersion)
+    public void VisitDecodedEvent(ToolkitModel.TypedNativeEvent decodedEvent, ReferencedEntity eventEmitterEntity, long stateVersion)
     {
         if (EventDecoder.TryGetFungibleVaultWithdrawalEvent(decodedEvent, out var fungibleVaultWithdrawalEvent))
         {

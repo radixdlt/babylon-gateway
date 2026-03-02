@@ -235,9 +235,6 @@ jobs:
       - join-migrations-images
       - setup-tags
     if: github.event_name == 'pull_request'
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - uses: RDXWorks-actions/checkout@main
       - uses: ./.github/actions/fetch-secrets
@@ -348,5 +345,5 @@ jobs:
           dotnetTestArguments: --filter RadixDlt.NetworkGateway.UnitTests --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SONAR_GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}

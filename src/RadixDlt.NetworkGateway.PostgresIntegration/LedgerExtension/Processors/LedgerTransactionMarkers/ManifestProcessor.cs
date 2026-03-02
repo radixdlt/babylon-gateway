@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Network;
@@ -81,15 +82,17 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
     private readonly ProcessorContext _context;
     private readonly ReferencedEntityDictionary _referencedEntities;
     private readonly NetworkConfiguration _networkConfiguration;
+    private readonly ILogger<ManifestProcessor> _logger;
 
     private readonly Dictionary<long, ManifestAddressesExtractor.ManifestAddresses> _manifestExtractedAddresses = new();
     private readonly Dictionary<long, List<LedgerTransactionManifestClass>> _manifestClasses = new();
 
-    public ManifestProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration)
+    public ManifestProcessor(ProcessorContext context, ReferencedEntityDictionary referencedEntities, NetworkConfiguration networkConfiguration, ILogger<ManifestProcessor> logger)
     {
         _context = context;
         _referencedEntities = referencedEntities;
         _networkConfiguration = networkConfiguration;
+        _logger = logger;
     }
 
     public void OnTransactionScan(CoreModel.CommittedTransaction transaction, long stateVersion)
@@ -101,7 +104,7 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
             using var manifestInstructions = ToolkitModel.InstructionsV1.FromString(coreInstructions, _networkConfiguration.Id);
             using var toolkitManifest = new ToolkitModel.TransactionManifestV1(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray());
 
-            AnalyzeManifestV1Classes(toolkitManifest, stateVersion);
+            AnalyzeManifestV1Classes(toolkitManifest, stateVersion, transaction.Receipt.Status);
 
             if (transaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
             {
@@ -120,12 +123,17 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
             var coreInstructions = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.Instructions;
             var coreBlobs = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.RootIntentCore.BlobsHex;
 
-            var children = userLedgerTransactionV2.NotarizedTransaction.SignedTransactionIntent.TransactionIntent.NonRootSubintents
-                .Select(x => new ToolkitModel.Hash(Convert.FromHexString(x.Hash))).ToArray();
+            var children = userLedgerTransactionV2
+                .NotarizedTransaction
+                .SignedTransactionIntent
+                .TransactionIntent
+                .NonRootSubintents
+                .Select(x => new ToolkitModel.Hash(Convert.FromHexString(x.Hash)))
+                .ToArray();
             using var manifestInstructions = ToolkitModel.InstructionsV2.FromString(coreInstructions, _networkConfiguration.Id);
             using var toolkitManifest = new ToolkitModel.TransactionManifestV2(manifestInstructions, coreBlobs.Values.Select(x => x.ConvertFromHex()).ToArray(), children);
 
-            AnalyzeManifestV2Classes(toolkitManifest, stateVersion);
+            AnalyzeManifestV2Classes(toolkitManifest, stateVersion, transaction.Receipt.Status);
 
             if (transaction.Receipt.Status == CoreModel.TransactionStatus.Succeeded)
             {
@@ -156,31 +164,55 @@ internal class ManifestProcessor : ITransactionMarkerProcessor, ITransactionScan
         return _manifestClasses.TryGetValue(stateVersion, out var mc) ? mc.ToArray() : Array.Empty<LedgerTransactionManifestClass>();
     }
 
-    private void AnalyzeManifestV1Classes(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion)
+    private void AnalyzeManifestV1Classes(ToolkitModel.TransactionManifestV1 toolkitManifest, long stateVersion, CoreModel.TransactionStatus transactionStatus)
     {
-        var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
-
-        foreach (var manifestClass in manifestSummary.classification)
+        try
         {
-            var mapped = manifestClass.ToModel();
+            var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
 
-            _manifestClasses
-                .GetOrAdd(stateVersion, _ => new List<LedgerTransactionManifestClass>())
-                .Add(mapped);
+            foreach (var manifestClass in manifestSummary.manifestClassification)
+            {
+                var mapped = manifestClass.ToModel();
+
+                _manifestClasses
+                    .GetOrAdd(stateVersion, _ => new List<LedgerTransactionManifestClass>())
+                    .Add(mapped);
+            }
+        }
+        catch (Exception e)
+        {
+            if (transactionStatus == CoreModel.TransactionStatus.Succeeded)
+            {
+                throw new UnreachableException($"Successfully commited transaction with stateVersion:{stateVersion} failed static analysis.", e);
+            }
+
+            _logger.LogWarning("Transaction with state version: {stateVersion} and status: {transactionStatus} failed static analysis with exception: {exception}", stateVersion, transactionStatus, e);
         }
     }
 
-    private void AnalyzeManifestV2Classes(ToolkitModel.TransactionManifestV2 toolkitManifest, long stateVersion)
+    private void AnalyzeManifestV2Classes(ToolkitModel.TransactionManifestV2 toolkitManifest, long stateVersion, CoreModel.TransactionStatus transactionStatus)
     {
-        var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
-
-        foreach (var manifestClass in manifestSummary.classification)
+        try
         {
-            var mapped = manifestClass.ToModel();
+            var manifestSummary = toolkitManifest.StaticallyAnalyze(_networkConfiguration.Id);
 
-            _manifestClasses
-                .GetOrAdd(stateVersion, _ => new List<LedgerTransactionManifestClass>())
-                .Add(mapped);
+            foreach (var manifestClass in manifestSummary.manifestClassification)
+            {
+                var mapped = manifestClass.ToModel();
+
+                _manifestClasses
+                    .GetOrAdd(stateVersion, _ => new List<LedgerTransactionManifestClass>())
+                    .Add(mapped);
+            }
+        }
+        catch (Exception e)
+        {
+            if (transactionStatus == CoreModel.TransactionStatus.Succeeded)
+            {
+                throw new UnreachableException("Successfully commited transaction should not fail static analysis.", e);
+            }
+
+            _logger.LogWarning("Transaction with state version: {stateVersion} and status: {transactionStatus} failed static analysis with exception: {exception}", stateVersion, transactionStatus, e);
         }
     }
 

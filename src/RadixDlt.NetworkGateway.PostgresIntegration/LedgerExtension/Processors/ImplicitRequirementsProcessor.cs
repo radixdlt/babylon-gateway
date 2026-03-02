@@ -70,12 +70,12 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixEngineToolkit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -124,7 +124,7 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
                 return;
             case CoreModel.UserLedgerTransaction userLedgerTransactionV1:
             {
-                var signerPublicKeys = NotarizedTransactionV1.FromPayloadBytes(userLedgerTransactionV1.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
+                var signerPublicKeys = ToolkitModel.NotarizedTransactionV1.FromPayloadBytes(userLedgerTransactionV1.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
                 foreach (var key in signerPublicKeys)
                 {
                     ObservePublicKeyHash(key, stateVersion);
@@ -135,7 +135,7 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
 
             case CoreModel.UserLedgerTransactionV2 userLedgerTransactionV2:
             {
-                var signerPublicKeys = NotarizedTransactionV2.FromPayloadBytes(userLedgerTransactionV2.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
+                var signerPublicKeys = ToolkitModel.NotarizedTransactionV2.FromPayloadBytes(userLedgerTransactionV2.NotarizedTransaction.GetPayloadBytes()).SignerPublicKeys();
                 foreach (var key in signerPublicKeys)
                 {
                     ObservePublicKeyHash(key, stateVersion);
@@ -192,11 +192,11 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
 
     private void ObserveGlobalCallerEntityHash(EntityAddress entityAddress, long stateVersion)
     {
-        using var retAddress = new Address(entityAddress);
+        using var retAddress = new ToolkitModel.Address(entityAddress);
 
-        var globalCallerNfid = RadixEngineToolkitUniffiMethods.DeriveGlobalCallerNonFungibleGlobalIdFromGlobalAddress(retAddress, _context.NetworkConfiguration.Id);
+        var globalCallerNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.DeriveGlobalCallerNonFungibleGlobalIdFromGlobalAddress(retAddress, _context.NetworkConfiguration.Id);
 
-        if (globalCallerNfid.LocalId() is not NonFungibleLocalId.Bytes globalCallerBytes)
+        if (globalCallerNfid.LocalId() is not ToolkitModel.NonFungibleLocalId.Bytes globalCallerBytes)
         {
             throw new UnreachableException($"Derived global caller should always be NonFungibleLocalId.Bytes but found: {globalCallerNfid.LocalId().GetType()}");
         }
@@ -214,11 +214,11 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
 
     private void ObservePackageOfDirectCallerHash(EntityAddress entityAddress, long stateVersion)
     {
-        using var retAddress = new Address(entityAddress);
+        using var retAddress = new ToolkitModel.Address(entityAddress);
 
-        var packageOfDirectCallerNfid = RadixEngineToolkitUniffiMethods.DerivePackageOfDirectCallerNonFungibleGlobalIdFromPackageAddress(retAddress, _context.NetworkConfiguration.Id);
+        var packageOfDirectCallerNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.DerivePackageOfDirectCallerNonFungibleGlobalIdFromPackageAddress(retAddress, _context.NetworkConfiguration.Id);
 
-        if (packageOfDirectCallerNfid.LocalId() is not NonFungibleLocalId.Bytes packageOfDirectCallerBytes)
+        if (packageOfDirectCallerNfid.LocalId() is not ToolkitModel.NonFungibleLocalId.Bytes packageOfDirectCallerBytes)
         {
             throw new UnreachableException($"Derived package of direct caller should always be NonFungibleLocalId.Bytes but found: {packageOfDirectCallerNfid.LocalId().GetType()}");
         }
@@ -233,13 +233,13 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
             });
     }
 
-    private void ObservePublicKeyHash(PublicKey publicKey, long stateVersion)
+    private void ObservePublicKeyHash(ToolkitModel.PublicKey publicKey, long stateVersion)
     {
-        var publicKeyHash = RadixEngineToolkitUniffiMethods.PublicKeyHashFromPublicKey(publicKey);
+        var publicKeyHash = ToolkitModel.RadixEngineToolkitUniffiMethods.PublicKeyHashFromPublicKey(publicKey);
 
         switch (publicKeyHash)
         {
-            case PublicKeyHash.Ed25519 ed25519:
+            case ToolkitModel.PublicKeyHash.Ed25519 ed25519:
                 _ed25519PublicKeyCopyImplicitRequirements.TryAdd(
                     ed25519.value.ToHex(),
                     new Ed25519PublicKeyImplicitRequirement
@@ -247,10 +247,10 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
                         Id = _context.Sequences.ImplicitRequirementsSequence++,
                         Hash = ed25519.value.ToHex(),
                         FirstSeenStateVersion = stateVersion,
-                        PublicKeyBytes = ((PublicKey.Ed25519)publicKey).value,
+                        PublicKeyBytes = ((ToolkitModel.PublicKey.Ed25519)publicKey).value,
                     });
                 break;
-            case PublicKeyHash.Secp256k1 secp256K1:
+            case ToolkitModel.PublicKeyHash.Secp256k1 secp256K1:
                 _secp256K1PublicKeyImplicitRequirements.TryAdd(
                     secp256K1.value.ToHex(),
                     new Secp256K1PublicKeyImplicitRequirement
@@ -258,7 +258,7 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
                         Id = _context.Sequences.ImplicitRequirementsSequence++,
                         Hash = secp256K1.value.ToHex(),
                         FirstSeenStateVersion = stateVersion,
-                        PublicKeyBytes = ((PublicKey.Secp256k1)publicKey).value,
+                        PublicKeyBytes = ((ToolkitModel.PublicKey.Secp256k1)publicKey).value,
                     });
                 break;
 
@@ -272,12 +272,12 @@ internal class ImplicitRequirementsProcessor : IProcessorBase, ITransactionProce
         ReferencedEntity referencedEntity,
         long stateVersion)
     {
-        var packageAddress = new Address(referencedEntity.Address);
+        var packageAddress = new ToolkitModel.Address(referencedEntity.Address);
 
-        var globalCallerBlueprintNfid = RadixEngineToolkitUniffiMethods.DeriveGlobalCallerNonFungibleGlobalIdFromBlueprintId(
+        var globalCallerBlueprintNfid = ToolkitModel.RadixEngineToolkitUniffiMethods.DeriveGlobalCallerNonFungibleGlobalIdFromBlueprintId(
             packageAddress, blueprintDefinitionEntrySubstate.Key.BlueprintName, _context.NetworkConfiguration.Id);
 
-        if (globalCallerBlueprintNfid.LocalId() is not NonFungibleLocalId.Bytes bytes)
+        if (globalCallerBlueprintNfid.LocalId() is not ToolkitModel.NonFungibleLocalId.Bytes bytes)
         {
             throw new UnreachableException($"Derived blueprint direct caller should always be NonFungibleLocalId.Bytes but found: {globalCallerBlueprintNfid.LocalId().GetType()}");
         }
