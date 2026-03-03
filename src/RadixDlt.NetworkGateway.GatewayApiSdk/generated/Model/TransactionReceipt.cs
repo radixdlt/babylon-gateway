@@ -113,7 +113,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nextEpoch">Information (number and active validator list) about new epoch if occured. This type is defined in the Core API as &#x60;NextEpoch&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="output">The manifest line-by-line engine return data (only present if &#x60;status&#x60; is &#x60;CommittedSuccess&#x60;). This type is defined in the Core API as &#x60;SborData&#x60;. See the Core API documentation for more details. .</param>
         /// <param name="events">Events emitted by a transaction. Please use the &#x60;detailed_events&#x60; instead, as it provides an enriched model with context and additional data..</param>
-        /// <param name="detailedEvents">Events emitted by a transaction, enriched with additional context and data.  For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained). .</param>
+        /// <param name="detailedEvents">Events emitted by a transaction, enriched with additional context and data.  For more information please visit [Detailed Eevents docs](#tag/Examples/Detailed-Events-Explained). .</param>
         /// <param name="errorMessage">Error message (only present if status is &#x60;Failed&#x60; or &#x60;Rejected&#x60;).</param>
         public TransactionReceipt(TransactionStatus? status = default(TransactionStatus?), Object feeSummary = default(Object), Object costingParameters = default(Object), Object feeDestination = default(Object), Object feeSource = default(Object), Object stateUpdates = default(Object), Object nextEpoch = default(Object), Object output = default(Object), List<EventsItem> events = default(List<EventsItem>), List<DetailedEventsItem> detailedEvents = default(List<DetailedEventsItem>), string errorMessage = default(string))
         {
@@ -187,9 +187,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<EventsItem> Events { get; set; }
 
         /// <summary>
-        /// Events emitted by a transaction, enriched with additional context and data.  For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained). 
+        /// Events emitted by a transaction, enriched with additional context and data.  For more information please visit [Detailed Eevents docs](#tag/Examples/Detailed-Events-Explained). 
         /// </summary>
-        /// <value>Events emitted by a transaction, enriched with additional context and data.  For more information please visit [Detailed Eevents docs](#section/Detailed-Events-Explained). </value>
+        /// <value>Events emitted by a transaction, enriched with additional context and data.  For more information please visit [Detailed Eevents docs](#tag/Examples/Detailed-Events-Explained). </value>
         [DataMember(Name = "detailed_events", EmitDefaultValue = true)]
         public List<DetailedEventsItem> DetailedEvents { get; set; }
 

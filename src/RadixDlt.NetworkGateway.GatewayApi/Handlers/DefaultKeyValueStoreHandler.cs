@@ -135,7 +135,7 @@ internal class DefaultKeyValueStoreHandler : IKeyValueStoreHandler
 
                     if (rawJson != null)
                     {
-                        var input = new RadixEngineToolkit.ScryptoSborString.ProgrammaticJson(rawJson);
+                        var input = new ToolkitModel.ScryptoSborString.ProgrammaticJson(rawJson);
                         rawBytes = ToolkitModel.RadixEngineToolkitUniffiMethods.ScryptoSborEncodeStringRepresentation(input);
                     }
                 }

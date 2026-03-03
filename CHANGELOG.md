@@ -4,6 +4,18 @@ Release built: _not released yet_
 ### Database changes
 - Fixed an invalid `index_in_epoch` value for transactions processed in a batch when they belonged to different epochs.
 
+## 1.10.5
+Release built: 2.03.2026
+
+### What’s new?
+- Updated Radix Engine Toolkit to 2.3.4 to resolve security vulnerabilities.
+
+## 1.10.4
+Release built: 29.10.2025
+
+### What’s new?
+- Updated base Docker images to resolve .NET security vulnerabilities.
+
 ## 1.10.3
 Release built: 25.06.2025
 

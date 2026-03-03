@@ -90,7 +90,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Check detailed [OptIns](#section/Using-endpoints-with-opt-in-features) documentation for more details
+    /// Check detailed [OptIns](#tag/Architecture/Using-endpoints-with-opt-in-features) documentation for more details
     /// </summary>
     [DataContract(Name = "StateEntityDetailsOptIns")]
     public partial class StateEntityDetailsOptIns

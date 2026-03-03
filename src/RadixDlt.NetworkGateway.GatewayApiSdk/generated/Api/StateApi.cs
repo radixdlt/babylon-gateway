@@ -326,7 +326,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get KeyValueStore Data
         /// </summary>
         /// <remarks>
-        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>
@@ -337,7 +337,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get KeyValueStore Data
         /// </summary>
         /// <remarks>
-        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>
@@ -774,7 +774,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get KeyValueStore Data
         /// </summary>
         /// <remarks>
-        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>
@@ -786,7 +786,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get KeyValueStore Data
         /// </summary>
         /// <remarks>
-        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>
@@ -2478,7 +2478,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>
@@ -2490,7 +2490,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>
@@ -2534,7 +2534,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>
@@ -2547,7 +2547,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#section/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
+        /// Get KeyValueStore Data Returns data (value) associated with a given key of a given key-value store. [Check detailed documentation for explanation](#tag/Examples/How-to-query-the-content-of-a-key-value-store-inside-a-component) 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="stateKeyValueStoreDataRequest"></param>

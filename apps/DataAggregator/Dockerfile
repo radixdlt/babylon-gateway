@@ -1,10 +1,10 @@
 # This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
 # docker build -f apps/DataAggregator/Dockerfile .
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.21-bookworm-slim AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0.415-bookworm-slim AS build
 WORKDIR /src
 COPY babylon-gateway.sln \
      babylon-gateway.sln.DotSettings \

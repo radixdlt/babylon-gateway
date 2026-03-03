@@ -64,24 +64,26 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System;
+using System.Diagnostics;
 using ToolkitModel = RadixEngineToolkit;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Utils;
 
 internal static class ToolkitModelExtensions
 {
-    public static LedgerTransactionManifestClass ToModel(this ToolkitModel.ManifestClass input)
+    public static LedgerTransactionManifestClass ToModel(this ToolkitModel.ManifestClassification input)
     {
         return input switch
         {
-            ToolkitModel.ManifestClass.General => LedgerTransactionManifestClass.General,
-            ToolkitModel.ManifestClass.Transfer => LedgerTransactionManifestClass.Transfer,
-            ToolkitModel.ManifestClass.PoolContribution => LedgerTransactionManifestClass.PoolContribution,
-            ToolkitModel.ManifestClass.PoolRedemption => LedgerTransactionManifestClass.PoolRedemption,
-            ToolkitModel.ManifestClass.ValidatorStake => LedgerTransactionManifestClass.ValidatorStake,
-            ToolkitModel.ManifestClass.ValidatorUnstake => LedgerTransactionManifestClass.ValidatorUnstake,
-            ToolkitModel.ManifestClass.ValidatorClaim => LedgerTransactionManifestClass.ValidatorClaim,
-            ToolkitModel.ManifestClass.AccountDepositSettingsUpdate => LedgerTransactionManifestClass.AccountDepositSettingsUpdate,
+            ToolkitModel.ManifestClassification.General => LedgerTransactionManifestClass.General,
+            ToolkitModel.ManifestClassification.Transfer => LedgerTransactionManifestClass.Transfer,
+            ToolkitModel.ManifestClassification.PoolContribution => LedgerTransactionManifestClass.PoolContribution,
+            ToolkitModel.ManifestClassification.PoolRedemption => LedgerTransactionManifestClass.PoolRedemption,
+            ToolkitModel.ManifestClassification.ValidatorStake => LedgerTransactionManifestClass.ValidatorStake,
+            ToolkitModel.ManifestClassification.ValidatorUnstake => LedgerTransactionManifestClass.ValidatorUnstake,
+            ToolkitModel.ManifestClassification.ValidatorClaimXrd => LedgerTransactionManifestClass.ValidatorClaim,
+            ToolkitModel.ManifestClassification.AccountDepositSettingsUpdate => LedgerTransactionManifestClass.AccountDepositSettingsUpdate,
+            ToolkitModel.ManifestClassification.GeneralSubintent => throw new UnreachableException("We shouldn't observe GeneralSubintent class when analyzing core transaction manifest."),
             _ => throw new ArgumentOutOfRangeException(nameof(input), input, null),
         };
     }
