@@ -1,8 +1,8 @@
 ## 1.10.6
-Release built: __TODO__
+Release built: 7.04.2026
 
 ### What’s new?
-- Updated Radix Engine Toolkit to 2.3.5 to resolve security vulnerabilities.
+- Updated Radix Engine Toolkit to 2.3.5 to resolve issue in 2.3.4 with static analysis of certain transactions.
 
 # 1.10.5
 Release built: 2.03.2026
