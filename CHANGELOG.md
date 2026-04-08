@@ -4,6 +4,12 @@ Release built: _not released yet_
 ### Database changes
 - Fixed an invalid `index_in_epoch` value for transactions processed in a batch when they belonged to different epochs.
 
+## 1.10.6
+Release built: 7.04.2026
+
+### What’s new?
+- Updated Radix Engine Toolkit to 2.3.5 to resolve issue in 2.3.4 with static analysis of certain transactions.
+
 ## 1.10.5
 Release built: 2.03.2026
 
