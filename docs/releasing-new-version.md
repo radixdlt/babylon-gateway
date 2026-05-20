@@ -30,19 +30,12 @@ python update-docker-compose.py {old_version} {new_version} #i.e python update-d
     2. https://hub.docker.com/r/radixdlt/babylon-ng-data-aggregator
     3. https://hub.docker.com/r/radixdlt/babylon-ng-database-migrations
 11. Publish new images to Gateway running on **stokenet** network.
-12. Publish API specs docs for **stokenet** network
-TODO1: link docs here and give url once we establish that.
+12. Publish API specs docs for **stokenet** network (https://docs.radixdlt.com/api-reference/gateway-api-preview-specs)
 13. Verify if it works correctly on **stokenet** network.
 14. Publish new images to Gateway running on **mainnet** network.
-15. Publish API specs docs for **mainnet** network
-TODO2: link docs here and give url once we establish that.
+15. Publish API specs docs for **mainnet** network (available here: https://docs.radixdlt.com/api-reference/gateway-api-specs)
 16. Publish typescript SDK created in step 5. to npmjs repository (https://www.npmjs.com/package/@radixdlt/babylon-gateway-api-sdk). 
 17. Update GitHub release created in step 9 and mark it `Set as the latest release`.
 18. Announce release publicly.
 19. Merge `main` branch back to `develop`.
 
-
-TODO1: ?
-
-TODO2:
-   https://radix-api-docs.radixdlt.workers.dev/gateway-api-specs ?
