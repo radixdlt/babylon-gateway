@@ -112,7 +112,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum V3 for value: V3
         /// </summary>
         [EnumMember(Value = "V3")]
-        V3 = 3
+        V3 = 3,
+
+        /// <summary>
+        /// Enum V4 for value: V4
+        /// </summary>
+        [EnumMember(Value = "V4")]
+        V4 = 4,
+
+        /// <summary>
+        /// Enum V5 for value: V5
+        /// </summary>
+        [EnumMember(Value = "V5")]
+        V5 = 5
 
     }
 
